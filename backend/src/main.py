@@ -79,6 +79,14 @@ app.include_router(rag.router, prefix=settings.api_prefix)
 from src.routes import workflows
 app.include_router(workflows.router, prefix=settings.api_prefix)
 
+# Import and include Auth router
+from src.routes import auth
+app.include_router(auth.router)
+
+# Import and include Metrics router
+from src.routes import metrics
+app.include_router(metrics.router)
+
 
 # Health check endpoint
 @app.get("/health")
