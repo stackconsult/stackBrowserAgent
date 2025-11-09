@@ -10,6 +10,8 @@ from config.settings import settings
 from src.agents import agent_registry, NavigatorAgent, PlannerAgent, ExecutorAgent
 from src.orchestration import orchestrator
 from src.routes import tasks
+from src.database import init_db, close_db
+from src.rag import rag_manager
 
 # Configure logging
 logging.basicConfig(
@@ -24,6 +26,9 @@ async def lifespan(app: FastAPI):
     """Manage application lifecycle."""
     # Startup
     logger.info("Starting StackBrowserAgent backend")
+    
+    # Initialize database
+    await init_db()
     
     # Register default agents
     await agent_registry.register(NavigatorAgent())
@@ -42,6 +47,7 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down backend")
     await orchestrator.stop()
+    await close_db()
     logger.info("Backend shut down")
 
 
@@ -64,6 +70,10 @@ app.add_middleware(
 
 # Include routers
 app.include_router(tasks.router, prefix=settings.api_prefix)
+
+# Import and include RAG router
+from src.routes import rag
+app.include_router(rag.router, prefix=settings.api_prefix)
 
 
 # Health check endpoint

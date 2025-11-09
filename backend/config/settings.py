@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     chroma_persist_directory: str = "./chroma_db"
     embedding_model: str = "text-embedding-ada-002"
     
+    # Pinecone (optional)
+    pinecone_api_key: Optional[str] = Field(default=None, env="PINECONE_API_KEY")
+    pinecone_environment: str = Field(default="us-west1-gcp", env="PINECONE_ENVIRONMENT")
+    pinecone_index_name: str = Field(default="stackbrowseragent", env="PINECONE_INDEX_NAME")
+    
     # Monitoring
     enable_metrics: bool = True
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
