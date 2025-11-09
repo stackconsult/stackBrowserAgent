@@ -31,7 +31,14 @@ class Settings(BaseSettings):
     @property
     def secret_key(self) -> str:
         """Get secret key from JWT_SECRET_KEY or SECRET_KEY environment variable."""
-        return os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY") or "change-me-in-production"
+        key = os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY")
+        if not key:
+            # Allow default in development, but warn in production
+            if os.getenv("ENVIRONMENT", "development").lower() == "production":
+                import logging
+                logging.critical("⚠️  SECURITY WARNING: Using default JWT secret key in production! Set JWT_SECRET_KEY environment variable.")
+            key = "change-me-in-production"
+        return key
     
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
