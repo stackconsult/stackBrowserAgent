@@ -46,6 +46,18 @@ A comprehensive browser extension combining the best features from multiple AI-p
 - Conversation history
 - Context menu integration
 
+## Quick Deploy Backend to Railway
+
+Deploy the backend API instantly with one click:
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/3fjp1R?referralCode=yft2bJ&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+After deployment:
+1. Railway will provision PostgreSQL automatically
+2. Set your JWT secret and optional API keys
+3. Get your deployment URL
+4. Configure the Chrome extension with the backend URL
+
 ## Installation
 
 ### From Source
