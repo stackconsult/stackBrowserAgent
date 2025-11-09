@@ -6,3 +6,17 @@ dist
 .vscode
 *.crx
 *.pem
+
+# Backend Python
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.py[cod]
+backend/**/*.py[cod]
+backend/venv/
+backend/ENV/
+backend/.env
+backend/*.db
+backend/*.sqlite
+backend/chroma_db/
+backend/.pytest_cache/
+backend/.coverage
