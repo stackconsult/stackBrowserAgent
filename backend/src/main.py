@@ -75,6 +75,10 @@ app.include_router(tasks.router, prefix=settings.api_prefix)
 from src.routes import rag
 app.include_router(rag.router, prefix=settings.api_prefix)
 
+# Import and include Workflow router
+from src.routes import workflows
+app.include_router(workflows.router, prefix=settings.api_prefix)
+
 
 # Health check endpoint
 @app.get("/health")
