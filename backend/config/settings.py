@@ -2,6 +2,7 @@
 Configuration settings for the backend system.
 Uses Pydantic Settings for environment variable management.
 """
+import os
 from typing import Optional
 from pydantic_settings import BaseSettings
 from pydantic import Field
@@ -26,8 +27,12 @@ class Settings(BaseSettings):
         env="DATABASE_URL"
     )
     
-    # Authentication
-    secret_key: str = Field(..., env="SECRET_KEY")
+    # Authentication (supports both SECRET_KEY and JWT_SECRET_KEY)
+    @property
+    def secret_key(self) -> str:
+        """Get secret key from JWT_SECRET_KEY or SECRET_KEY environment variable."""
+        return os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY") or "change-me-in-production"
+    
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7

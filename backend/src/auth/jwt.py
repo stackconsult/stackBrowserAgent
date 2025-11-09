@@ -1,4 +1,5 @@
 """JWT token management."""
+import os
 from datetime import datetime, timedelta
 from typing import Optional, Dict
 from jose import jwt, JWTError
