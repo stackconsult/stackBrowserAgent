@@ -1,2 +1,202 @@
 # stackBrowserAgent
-Browser Agent Hoarde
+
+🤖 A powerful Chromium-based browser automation system with extension support for building automation tools, testing frameworks, and web scraping applications.
+
+## Features
+
+- ✅ **Chromium Browser Control**: Full control over Chromium browser via Puppeteer
+- 🔌 **Extension Support**: Load and manage browser extensions dynamically
+- 🎯 **Command System**: Extensible command framework for automation tasks
+- 📝 **Structured Logging**: Winston-based logging with multiple outputs
+- 🔒 **Session Management**: Track and manage browser sessions
+- 🎨 **TypeScript**: Full TypeScript support with type definitions
+- 🧪 **Testing Ready**: Jest configuration for unit and integration tests
+- 📚 **Well Documented**: Comprehensive documentation and examples
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js v18.0.0 or higher
+- npm v9.0.0 or higher
+- Git
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/stackconsult/stackBrowserAgent.git
+cd stackBrowserAgent
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Run the agent
+npm start
+```
+
+### Development Mode
+
+```bash
+# Run with hot-reload
+npm run dev
+```
+
+## Project Structure
+
+```
+stackBrowserAgent/
+├── src/                    # Source code
+│   ├── agent/             # Core agent logic
+│   ├── extensions/        # Extension loading
+│   ├── types/             # TypeScript types
+│   └── utils/             # Utilities
+├── extensions/            # Browser extensions
+│   └── example-extension/ # Example extension
+├── docs/                  # Documentation
+├── tests/                 # Test files
+└── scripts/               # Build scripts
+```
+
+## Documentation
+
+- 📖 [Setup Guide](docs/setup.md) - Detailed setup instructions
+- 🏗️ [Architecture](docs/architecture.md) - System architecture and design
+- 🔧 [Reassembly Guide](docs/reassembly.md) - Complete reassembly instructions
+- 📊 [Repository Assessment](REPOSITORY_ASSESSMENT.md) - Project assessment and roadmap
+
+## Configuration
+
+Create a `.env` file:
+
+```env
+HEADLESS=false
+DEVTOOLS=false
+VIEWPORT_WIDTH=1920
+VIEWPORT_HEIGHT=1080
+EXTENSIONS_PATH=./extensions
+LOG_LEVEL=info
+SERVER_PORT=3000
+SERVER_HOST=localhost
+```
+
+## Usage Example
+
+```typescript
+import { BrowserAgent } from './src';
+
+const agent = new BrowserAgent({
+  browser: {
+    headless: false,
+    devtools: false,
+    extensionsPath: './extensions',
+  },
+  logging: {
+    level: 'info',
+  },
+});
+
+// Start the agent
+await agent.start();
+
+// Execute commands
+const result = await agent.executeCommand({
+  type: 'navigate',
+  payload: { url: 'https://example.com' },
+});
+
+console.log(result);
+
+// Stop the agent
+await agent.stop();
+```
+
+## Available Commands
+
+### Navigate
+Navigate to a URL:
+```typescript
+{
+  type: 'navigate',
+  payload: { url: 'https://example.com' }
+}
+```
+
+### Screenshot
+Capture a screenshot:
+```typescript
+{
+  type: 'screenshot',
+  payload: {
+    path: './screenshot.png',
+    fullPage: true
+  }
+}
+```
+
+## Extension Development
+
+Create custom extensions in the `extensions/` directory:
+
+```
+extensions/my-extension/
+├── manifest.json
+├── background.js
+├── content.js
+└── popup.html
+```
+
+See the [example-extension](extensions/example-extension/) for a complete example.
+
+## Scripts
+
+```bash
+npm run dev          # Development mode with hot-reload
+npm run build        # Build TypeScript to JavaScript
+npm start            # Run the compiled agent
+npm test             # Run tests
+npm run lint         # Lint code
+npm run format       # Format code
+npm run typecheck    # Type check without building
+```
+
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode
+npm run test:watch
+```
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines and submit pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- 📝 [Documentation](docs/)
+- 🐛 [Issue Tracker](https://github.com/stackconsult/stackBrowserAgent/issues)
+- 💬 [Discussions](https://github.com/stackconsult/stackBrowserAgent/discussions)
+
+## Acknowledgments
+
+- Built with [Puppeteer](https://pptr.dev/)
+- Powered by [Chromium](https://www.chromium.org/)
+- TypeScript for type safety
+- Winston for logging
+
+---
+
+Made with ❤️ by [stackconsult](https://github.com/stackconsult)
