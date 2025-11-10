@@ -188,11 +188,12 @@ docker run -p 8000:8000 -e SECRET_KEY=your-key stackbrowseragent-backend
 
 ## Production Deployment
 
-See [BACKEND_PLAN.md](./BACKEND_PLAN.md) for detailed deployment guide including:
-- Railway/Render deployment
+See [GITHUB_DEPLOYMENT.md](../GITHUB_DEPLOYMENT.md) for detailed deployment guide including:
+- GitHub Container Registry deployment
 - Environment configuration
-- CI/CD setup
+- CI/CD setup with GitHub Actions
 - Monitoring and logging
+- Deploy to any platform (VPS, Kubernetes, container platforms)
 
 ## Next Steps
 

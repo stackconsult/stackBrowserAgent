@@ -1,99 +1,107 @@
-# Quick Start Guide - 10 Minute Deployment
+# Quick Start Guide - 5 Minute Setup
 
-Get stackBrowserAgent running in production in 10 minutes.
+Get stackBrowserAgent running with GitHub-native deployment.
 
-## Option 1: Automated Deployment (Recommended)
+## Option 1: GitHub Actions Deployment (Recommended)
 
-### One-Command Deployment
+### Automatic Build & Publish
 
-```bash
-# Clone repository
-git clone https://github.com/stackconsult/stackBrowserAgent.git
-cd stackBrowserAgent
+GitHub Actions automatically builds and publishes on every push:
 
-# Run automated deployment
-chmod +x scripts/deploy-railway.sh
-./scripts/deploy-railway.sh
-```
+1. **Backend Docker Image**
+   - Built and published to GitHub Container Registry (GHCR)
+   - Available at: `ghcr.io/stackconsult/stackbrowseragent/backend:latest`
 
-The script will:
-1. ✅ Install Railway CLI (if needed)
-2. ✅ Login to Railway
-3. ✅ Create project
-4. ✅ Add PostgreSQL database
-5. ✅ Configure environment variables
-6. ✅ Deploy backend
-7. ✅ Test deployment
-8. ✅ Show your deployment URL
+2. **Chrome Extension**
+   - Built and packaged automatically
+   - Published to GitHub Releases
+   - Download from: [Releases](https://github.com/stackconsult/stackBrowserAgent/releases/latest)
 
-**Time**: ~5 minutes
+**Time**: Automatic (3-5 minutes after push)
 
 ---
 
-## Option 2: Manual Deployment
+## Option 2: Deploy Backend
 
-### Step 1: Deploy Backend (3 minutes)
-
-1. **Go to Railway**
-   - Visit https://railway.app
-   - Click "Start a New Project"
-   - Login with GitHub
-
-2. **Deploy**
-   - Select "Deploy from GitHub repo"
-   - Choose `stackconsult/stackBrowserAgent`
-   - Click "Add PostgreSQL" from the dashboard
-
-3. **Configure**
-   - Go to Variables tab
-   - Add: `JWT_SECRET_KEY` = `[openssl rand -hex 32]`
-   - Add: `ENVIRONMENT` = `production`
-
-4. **Wait for Build**
-   - Takes ~2 minutes
-   - Get your URL from the dashboard
-
-### Step 2: Setup Extension (2 minutes)
+### Step 1: Run Backend Docker Container (2 minutes)
 
 ```bash
-# Install dependencies
-npm install
+# Pull from GitHub Container Registry
+docker pull ghcr.io/stackconsult/stackbrowseragent/backend:latest
 
-# Build extension
-npm run build
+# Run with environment variables
+docker run -d -p 8000:8000 \
+  -e JWT_SECRET_KEY=$(openssl rand -hex 32) \
+  -e DATABASE_URL=sqlite:///./data/app.db \
+  --name browser-agent-backend \
+  ghcr.io/stackconsult/stackbrowseragent/backend:latest
 
-# Load in Chrome
+# Or with PostgreSQL using Docker Compose
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+services:
+  backend:
+    image: ghcr.io/stackconsult/stackbrowseragent/backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - DATABASE_URL=postgresql://postgres:password@db:5432/browseragent
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=browseragent
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
+EOF
+
+# Generate JWT secret
+export JWT_SECRET_KEY=$(openssl rand -hex 32)
+
+# Start services
+docker-compose up -d
+```
+
+### Step 2: Install Extension (2 minutes)
+
+```bash
+# Download from GitHub Releases
+# Visit: https://github.com/stackconsult/stackBrowserAgent/releases/latest
+# Download: stackbrowseragent-extension.zip
+
+# Extract and load in Chrome
+unzip stackbrowseragent-extension.zip
 # 1. Open chrome://extensions
 # 2. Enable "Developer mode"
 # 3. Click "Load unpacked"
-# 4. Select dist/ folder
+# 4. Select extracted folder
 ```
 
 ### Step 3: Configure Backend URL (1 minute)
 
-Edit `src/config/backend.ts`:
-```typescript
-export const BACKEND_URL = 'https://your-app.railway.app';
-```
+If using local backend, no configuration needed (defaults to localhost:8000).
 
-Rebuild:
-```bash
-npm run build
+For remote backend, edit `src/config/backend.ts`:
+```typescript
+export const BACKEND_URL = 'http://your-server:8000';
 ```
 
 ### Step 4: Test (1 minute)
 
 ```bash
 # Test backend
-curl https://your-app.railway.app/health
+curl http://localhost:8000/health
 
 # Register user
-curl -X POST https://your-app.railway.app/api/auth/register \
+curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"test123","username":"test"}'
 ```
 
-**Time**: ~7 minutes
+**Time**: ~5 minutes
 
 ---
 
@@ -135,13 +143,13 @@ Load extension from `dist/` folder in Chrome.
 
 ## What You Get
 
-### Backend (Running on Railway)
+### Backend (Docker Container)
 - ✅ FastAPI server with 20 concurrent workers
-- ✅ PostgreSQL database
+- ✅ PostgreSQL/SQLite database
 - ✅ JWT authentication
 - ✅ RAG with vector database
 - ✅ Workflow engine
-- ✅ Auto-deploy on git push
+- ✅ Auto-build via GitHub Actions
 
 ### Chrome Extension
 - ✅ 6 specialized AI agents
@@ -161,14 +169,17 @@ Load extension from `dist/` folder in Chrome.
 
 ## Costs
 
-**Free Tier** (Sufficient for beta):
-- Railway: $5/month credits (free)
+**Free Deployment Options:**
+- GitHub Container Registry: Free (public repositories)
 - Extension: Free to use
-- **Total**: $0/month for small usage
+- Docker hosting on VPS: From $5/month (DigitalOcean, Linode)
+- **Total**: $5-10/month for small-medium usage
 
-**Paid** (For production):
-- Railway Hobby: $5/month + usage (~$10-20/month for 100-500 users)
-- **Total**: ~$10-20/month
+**Production Scale:**
+- Managed Kubernetes (GKE/EKS/AKS): From $70/month
+- Container Platform (Render/Fly.io): From $7-20/month
+- Database (Managed PostgreSQL): From $15/month
+- **Total**: ~$30-100/month for production
 
 ---
 
@@ -176,8 +187,8 @@ Load extension from `dist/` folder in Chrome.
 
 ### Backend won't start
 ```bash
-railway logs  # Check error logs
-railway restart  # Restart service
+docker logs browser-agent-backend  # Check error logs
+docker restart browser-agent-backend  # Restart service
 ```
 
 ### Extension can't connect
@@ -187,8 +198,12 @@ railway restart  # Restart service
 
 ### Database issues
 ```bash
-railway variables  # Verify DATABASE_URL exists
-railway restart  # Restart to reconnect
+# Check database connection
+curl http://localhost:8000/health | jq .database
+
+# Restart with fresh database
+docker-compose down -v
+docker-compose up -d
 ```
 
 ---
@@ -198,27 +213,27 @@ railway restart  # Restart to reconnect
 After successful deployment:
 
 1. **Invite Beta Users**
-   - Share extension package
-   - Provide backend URL
+   - Share extension package from GitHub Releases
+   - Provide backend URL (your server IP/domain)
    - Collect feedback
 
 2. **Monitor Usage**
-   - Check Railway dashboard
-   - View logs: `railway logs`
-   - Set up alerts
+   - Check Docker logs: `docker logs browser-agent-backend`
+   - View metrics at backend:/metrics endpoint
+   - Set up monitoring (Prometheus/Grafana)
 
 3. **Iterate**
    - Fix reported issues
    - Add requested features
-   - Auto-deploys on git push
+   - Auto-builds on git push via GitHub Actions
 
 ---
 
 ## Support
 
-- **Deployment Issues**: See [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md)
+- **Deployment Issues**: See [GITHUB_DEPLOYMENT.md](GITHUB_DEPLOYMENT.md)
 - **Extension Issues**: See [INSTALLATION.md](INSTALLATION.md)
-- **API Documentation**: Visit `https://your-app.railway.app/docs`
+- **API Documentation**: Visit `http://localhost:8000/docs` or your backend URL + `/docs`
 - **GitHub Issues**: https://github.com/stackconsult/stackBrowserAgent/issues
 
 ---

@@ -1,8 +1,64 @@
 # Deployment Guide
 
-## Docker Deployment
+## GitHub-Native Deployment (Recommended)
 
-### Local Development with Docker Compose
+The system uses GitHub Actions for CI/CD and GitHub Container Registry (GHCR) for Docker images.
+
+### Automated Deployment
+
+**Every push to the repository automatically:**
+- Builds Docker image for backend
+- Publishes to `ghcr.io/stackconsult/stackbrowseragent/backend`
+- Builds Chrome extension
+- Creates GitHub Release with downloadable ZIP
+
+### Pull and Deploy Backend
+
+```bash
+# Pull latest Docker image from GHCR
+docker pull ghcr.io/stackconsult/stackbrowseragent/backend:latest
+
+# Run backend
+docker run -d -p 8000:8000 \
+  -e JWT_SECRET_KEY=$(openssl rand -hex 32) \
+  -e DATABASE_URL=postgresql://user:pass@host:5432/db \
+  --name browser-agent-backend \
+  ghcr.io/stackconsult/stackbrowseragent/backend:latest
+
+# Check health
+curl http://localhost:8000/health
+```
+
+### With Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  backend:
+    image: ghcr.io/stackconsult/stackbrowseragent/backend:latest
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - DATABASE_URL=postgresql://postgres:password@db:5432/browseragent
+  
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=browseragent
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+```
+
+Run with: `docker-compose up -d`
+
+## Local Development with Docker Compose
 
 1. **Create `.env` file**:
 ```bash
@@ -31,61 +87,70 @@ docker-compose logs -f backend
 docker-compose down
 ```
 
-### Production Deployment
+## Deployment to Various Platforms
 
-#### Option 1: Railway
+### Option 1: Any VPS (DigitalOcean, AWS, Linode, etc.)
 
-1. Install Railway CLI:
 ```bash
-npm install -g @railway/cli
+# SSH into your VPS
+ssh user@your-vps-ip
+
+# Pull image from GHCR
+docker pull ghcr.io/stackconsult/stackbrowseragent/backend:latest
+
+# Run with environment variables
+docker run -d -p 8000:8000 \
+  -e JWT_SECRET_KEY=your-secret-key \
+  -e DATABASE_URL=postgresql://user:pass@host:5432/db \
+  --restart always \
+  --name browser-agent \
+  ghcr.io/stackconsult/stackbrowseragent/backend:latest
 ```
 
-2. Login and init:
-```bash
-railway login
-railway init
-```
+### Option 2: Kubernetes (GKE, EKS, AKS)
 
-3. Add environment variables in Railway dashboard
-
-4. Deploy:
-```bash
-cd backend
-railway up
-```
-
-5. Get URL:
-```bash
-railway domain
-```
-
-#### Option 2: Docker on VPS
-
-1. Build and push image:
-```bash
-cd backend
-docker build -t your-registry/stackbrowseragent:latest .
-docker push your-registry/stackbrowseragent:latest
-```
-
-2. On VPS, create `docker-compose.prod.yml`:
 ```yaml
-version: '3.8'
-services:
-  backend:
-    image: your-registry/stackbrowseragent:latest
-    restart: always
-    environment:
-      - DATABASE_URL=your-db-url
-      # Add other env vars
-    ports:
-      - "8000:8000"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: browser-agent-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: browser-agent
+  template:
+    metadata:
+      labels:
+        app: browser-agent
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/stackconsult/stackbrowseragent/backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: browser-agent-secrets
+              key: jwt-secret
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: browser-agent-secrets
+              key: database-url
 ```
 
-3. Deploy:
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
+Apply with: `kubectl apply -f deployment.yaml`
+
+### Option 3: Container Platforms (Render, Fly.io, etc.)
+
+Most container platforms can deploy directly from GHCR:
+1. Connect your GitHub repository
+2. Point to `ghcr.io/stackconsult/stackbrowseragent/backend:latest`
+3. Set environment variables
+4. Deploy
 
 ## Chrome Extension Deployment
 
