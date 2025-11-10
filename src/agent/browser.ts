@@ -19,15 +19,11 @@ export class BrowserManager {
   async launch(): Promise<Browser> {
     try {
       const extensionPaths = await this.extensionLoader.getExtensionPaths();
-      
+
       const launchOptions: any = {
         headless: this.config.headless,
         devtools: this.config.devtools,
-        args: [
-          ...(this.config.args || []),
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-        ],
+        args: [...(this.config.args || []), '--no-sandbox', '--disable-setuid-sandbox'],
       };
 
       // Add extensions if any are found

@@ -5,14 +5,11 @@ import { NavigateCommand, ScreenshotCommand } from './commands';
 import { logger, createLogger } from '../utils/logger';
 
 export class BrowserAgent {
-  private config: AgentConfig;
   private browserManager: BrowserManager;
   private sessionManager: SessionManager | null = null;
   private commands: Map<string, any> = new Map();
 
   constructor(config: AgentConfig) {
-    this.config = config;
-
     // Initialize logger
     if (config.logging) {
       Object.assign(logger, createLogger(config.logging.level, config.logging.file));

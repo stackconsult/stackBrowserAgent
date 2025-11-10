@@ -19,16 +19,21 @@ export class SessionManager {
    */
   async getSessionInfo(): Promise<SessionInfo> {
     const browser = this.browserManager.getBrowser();
-    
+
     if (!browser) {
       throw new Error('Browser not launched');
     }
 
     const version = await browser.version();
     const pages = await browser.pages();
-    const userAgent = pages.length > 0 
-      ? await pages[0].evaluate(() => navigator.userAgent)
-      : 'Unknown';
+    let userAgent = 'Unknown';
+    if (pages.length > 0) {
+      userAgent = await pages[0].evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore - navigator is available in browser context
+        return navigator.userAgent;
+      });
+    }
 
     const extensions = this.browserManager.getLoadedExtensions();
 

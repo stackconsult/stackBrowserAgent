@@ -1,6 +1,5 @@
 import { AgentCommand, AgentResponse } from '../../types';
 import { BrowserManager } from '../browser';
-import { logger } from '../../utils/logger';
 
 export abstract class BaseCommand {
   protected browserManager: BrowserManager;
