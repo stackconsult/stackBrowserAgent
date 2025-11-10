@@ -296,7 +296,266 @@ git diff test/temporal-containers-main test/temporal-containers-rollback
 
 ## Phase 3: Automated Testing (1.5 hours)
 
-### 3.1 Test Suite Setup
+### 3.1 Tripwire Measurement Constants (NEW)
+
+**Hardline Immovable Measures at Agent Handoff Points**
+
+These tripwires trigger at 25%, 50%, and 75% test completion to enable qualitative scale validation in blocks. They're hardwired after agent handoff points to pick up refactoring issues and assess modeling changeovers with accuracy for future updates.
+
+```typescript
+// test/tripwires/constants.ts
+export const TRIPWIRE_CONSTANTS = {
+  // Tripwire 1: Memory Pressure Threshold
+  memoryPressure: {
+    metric: 'containerOverheadVsBaseline',
+    unit: 'percentage',
+    threshold: 15, // >15% memory increase = HALT
+    checkpoints: [0.25, 0.50, 0.75], // 25%, 50%, 75% completion
+    action: 'HALT_AND_ANALYZE',
+    immutable: true, // Cannot be changed during test
+    purpose: 'Prevent memory allocation issues before they cascade',
+    measurements: {
+      baseline: 'rollback branch memory usage',
+      comparison: 'main branch memory usage', 
+      calculation: '((main - rollback) / rollback) * 100'
+    }
+  },
+  
+  // Tripwire 2: Latency Variance Ceiling
+  latencyVariance: {
+    metric: 'p95LatencyConsistency',
+    unit: 'percentage',
+    threshold: 20, // >20% variance from median = FLAG ANOMALY
+    checkpoints: [0.25, 0.50, 0.75],
+    action: 'FLAG_AND_DUPLICATE',
+    immutable: true,
+    purpose: 'Catch performance inconsistencies early',
+    measurements: {
+      baseline: 'P95 latency across 100 ops per checkpoint',
+      comparison: 'Median latency for that checkpoint',
+      calculation: '((p95 - median) / median) * 100'
+    }
+  },
+  
+  // Tripwire 3: Data Integrity Checkpoint
+  dataIntegrity: {
+    metric: 'jsonSchemaValidationFailures',
+    unit: 'percentage',
+    threshold: 2, // >2% validation errors = IMMEDIATE ROLLBACK
+    checkpoints: [0.25, 0.50, 0.75],
+    action: 'IMMEDIATE_ROLLBACK',
+    immutable: true,
+    purpose: 'Ensure container schema integrity at scale',
+    measurements: {
+      baseline: 'Count of schema validation failures',
+      comparison: 'Total validation attempts',
+      calculation: '(failures / attempts) * 100'
+    }
+  }
+} as const; // TypeScript const assertion = truly immutable
+```
+
+**Tripwire Implementation**:
+
+```typescript
+// test/tripwires/monitor.ts
+export class TripwireMonitor {
+  private readonly constants = TRIPWIRE_CONSTANTS;
+  private checkpointResults: Map<string, CheckpointResult[]> = new Map();
+  
+  // Called at 25%, 50%, 75% completion
+  async checkTripwire(
+    tripwire: keyof typeof TRIPWIRE_CONSTANTS,
+    progress: number
+  ): Promise<TripwireStatus> {
+    const config = this.constants[tripwire];
+    
+    // Only check at designated checkpoints
+    if (!config.checkpoints.includes(progress)) {
+      return { status: 'skipped', reason: 'not a checkpoint' };
+    }
+    
+    // Measure current value
+    const measurement = await this.measure(config.metric);
+    
+    // Compare against threshold (immutable)
+    if (measurement.value > config.threshold) {
+      return {
+        status: 'triggered',
+        tripwire,
+        checkpoint: progress,
+        measured: measurement.value,
+        threshold: config.threshold,
+        action: config.action,
+        timestamp: Date.now()
+      };
+    }
+    
+    // Store result for historical analysis
+    this.recordCheckpoint(tripwire, progress, measurement);
+    
+    return {
+      status: 'passed',
+      tripwire,
+      checkpoint: progress,
+      measured: measurement.value,
+      threshold: config.threshold
+    };
+  }
+  
+  // Execute tripwire action
+  async executeTripwireAction(status: TripwireStatus): Promise<void> {
+    switch (status.action) {
+      case 'HALT_AND_ANALYZE':
+        await this.haltTest();
+        await this.analyzeMemoryAllocation();
+        await this.generateReport('memory-pressure-report.json');
+        break;
+        
+      case 'FLAG_AND_DUPLICATE':
+        await this.flagAnomaly(status);
+        await this.scheduleDuplicateTest();
+        // Continue current test but prepare duplicate
+        break;
+        
+      case 'IMMEDIATE_ROLLBACK':
+        await this.haltTest();
+        await this.rollback();
+        await this.generateReport('data-integrity-failure.json');
+        break;
+    }
+  }
+  
+  // Analyze trends across checkpoints
+  analyzeTrends(): TripwireTrendAnalysis {
+    const trends = {};
+    
+    for (const [tripwire, results] of this.checkpointResults) {
+      trends[tripwire] = {
+        direction: this.calculateDirection(results),
+        volatility: this.calculateVolatility(results),
+        projection: this.projectNextCheckpoint(results),
+        risk: this.assessRisk(results)
+      };
+    }
+    
+    return trends;
+  }
+}
+```
+
+**Tripwire Checkpoint Integration**:
+
+```typescript
+// test/runner/test-executor.ts
+export class TestExecutor {
+  private tripwireMonitor = new TripwireMonitor();
+  private totalTests = 50;
+  
+  async runTests(): Promise<TestResults> {
+    const results = [];
+    
+    for (let i = 0; i < this.totalTests; i++) {
+      // Run test
+      const result = await this.executeTest(i);
+      results.push(result);
+      
+      // Calculate progress
+      const progress = (i + 1) / this.totalTests;
+      
+      // Check tripwires at 25%, 50%, 75%
+      if ([0.25, 0.50, 0.75].includes(progress)) {
+        console.log(`\n🚨 TRIPWIRE CHECKPOINT: ${progress * 100}% complete\n`);
+        
+        // Check all three tripwires
+        const memoryStatus = await this.tripwireMonitor.checkTripwire(
+          'memoryPressure', progress
+        );
+        const latencyStatus = await this.tripwireMonitor.checkTripwire(
+          'latencyVariance', progress
+        );
+        const integrityStatus = await this.tripwireMonitor.checkTripwire(
+          'dataIntegrity', progress
+        );
+        
+        // Handle triggered tripwires
+        for (const status of [memoryStatus, latencyStatus, integrityStatus]) {
+          if (status.status === 'triggered') {
+            console.error(`⚠️ TRIPWIRE TRIGGERED: ${status.tripwire}`);
+            await this.tripwireMonitor.executeTripwireAction(status);
+            
+            // Some actions halt execution
+            if (status.action === 'HALT_AND_ANALYZE' || 
+                status.action === 'IMMEDIATE_ROLLBACK') {
+              return {
+                completed: false,
+                reason: 'tripwire-triggered',
+                tripwire: status,
+                results: results
+              };
+            }
+          }
+        }
+        
+        // Log trends
+        const trends = this.tripwireMonitor.analyzeTrends();
+        console.log('📊 Tripwire Trends:', trends);
+      }
+    }
+    
+    return { completed: true, results };
+  }
+}
+```
+
+**Benefits of Hardline Tripwires**:
+
+1. **Qualitative Scale Validation**: Measures impact, quality, and speed in discrete blocks (25%, 50%, 75%)
+2. **Preemptive Future Build Improvement**: Detects patterns early, enabling refinement before completion
+3. **No Trial/Rollback Endurance**: Stops bad tests fast, preventing wasted effort
+4. **Agent Handoff Precision**: Positioned after each multi-agent handoff point
+5. **Refactoring Detection**: Catches unintended consequences of code changes
+6. **Modeling Changeover Accuracy**: Validates architecture changes with mathematical precision
+7. **Immutable Constants**: Cannot be adjusted during test execution (prevents gaming)
+
+**Tripwire Output Example**:
+
+```json
+{
+  "checkpoint": "50%",
+  "timestamp": 1699632000000,
+  "tripwires": {
+    "memoryPressure": {
+      "status": "passed",
+      "measured": 12.3,
+      "threshold": 15,
+      "trend": "stable",
+      "projection": 13.1
+    },
+    "latencyVariance": {
+      "status": "triggered",
+      "measured": 23.7,
+      "threshold": 20,
+      "trend": "increasing",
+      "projection": 28.4,
+      "action": "FLAG_AND_DUPLICATE"
+    },
+    "dataIntegrity": {
+      "status": "passed",
+      "measured": 0.8,
+      "threshold": 2,
+      "trend": "stable",
+      "projection": 0.9
+    }
+  },
+  "overallRisk": "medium",
+  "recommendation": "Continue with duplicate test scheduled"
+}
+```
+
+---
+
+### 3.2 Test Suite Setup
 
 ```typescript
 // test/temporal-containers/suite.ts
