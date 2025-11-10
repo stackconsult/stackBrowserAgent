@@ -22,8 +22,8 @@ export class VersionManager {
    */
   static async getCurrentVersion(): Promise<string> {
     try {
-      const puppeteer = await import('puppeteer');
       // Get version from package.json
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const packageJson = require('../../package.json');
       return packageJson.dependencies.puppeteer.replace('^', '').replace('~', '');
     } catch (error) {
@@ -108,9 +108,7 @@ export class VersionManager {
           logger.info('Browser version is compatible');
           return true;
         } else {
-          logger.warn(
-            `Browser version ${majorVersion} may be outdated. Chrome 121+ recommended.`
-          );
+          logger.warn(`Browser version ${majorVersion} may be outdated. Chrome 121+ recommended.`);
           return true; // Still return true for now, just warn
         }
       }

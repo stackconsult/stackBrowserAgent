@@ -346,12 +346,7 @@ export class OllamaProvider {
   /**
    * Make HTTP request to Ollama
    */
-  private makeRequest(
-    path: string,
-    method: string,
-    body?: any,
-    timeout?: number
-  ): Promise<any> {
+  private makeRequest(path: string, method: string, body?: any, timeout?: number): Promise<any> {
     return new Promise((resolve, reject) => {
       const url = new URL(path, this.baseUrl);
       const isHttps = url.protocol === 'https:';
@@ -423,10 +418,7 @@ export class LLMManager {
   /**
    * Generate response from LLM
    */
-  async generate(
-    prompt: string | LLMMessage[],
-    sessionId?: string
-  ): Promise<LLMResponse> {
+  async generate(prompt: string | LLMMessage[], sessionId?: string): Promise<LLMResponse> {
     let messages: LLMMessage[];
 
     if (typeof prompt === 'string') {

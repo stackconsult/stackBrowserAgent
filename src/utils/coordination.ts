@@ -148,7 +148,10 @@ export class MessageBus extends EventEmitter {
    */
   getHistory(agentId: string, limit: number = 100): Message[] {
     return this.messages
-      .filter((m) => m.from === agentId || m.to === agentId || (Array.isArray(m.to) && m.to.includes(agentId)))
+      .filter(
+        (m) =>
+          m.from === agentId || m.to === agentId || (Array.isArray(m.to) && m.to.includes(agentId))
+      )
       .slice(-limit);
   }
 
@@ -499,8 +502,7 @@ export class SharedMemoryManager extends EventEmitter {
       locks: this.locks.size,
       byAccess: {
         public: Array.from(this.memory.values()).filter((e) => e.access === 'public').length,
-        protected: Array.from(this.memory.values()).filter((e) => e.access === 'protected')
-          .length,
+        protected: Array.from(this.memory.values()).filter((e) => e.access === 'protected').length,
         private: Array.from(this.memory.values()).filter((e) => e.access === 'private').length,
       },
     };
@@ -516,7 +518,10 @@ export class LoadBalancer {
   private strategy: 'round-robin' | 'least-load' | 'random';
   private roundRobinIndex: Map<string, number> = new Map();
 
-  constructor(registry: AgentRegistry, strategy: 'round-robin' | 'least-load' | 'random' = 'least-load') {
+  constructor(
+    registry: AgentRegistry,
+    strategy: 'round-robin' | 'least-load' | 'random' = 'least-load'
+  ) {
     this.registry = registry;
     this.strategy = strategy;
   }
@@ -552,9 +557,7 @@ export class LoadBalancer {
    * Least-load selection
    */
   private selectLeastLoad(candidates: AgentProfile[]): AgentProfile {
-    return candidates.reduce((best, current) =>
-      current.load < best.load ? current : best
-    );
+    return candidates.reduce((best, current) => (current.load < best.load ? current : best));
   }
 
   /**

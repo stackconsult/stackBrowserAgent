@@ -23,6 +23,7 @@ export class InputValidator {
     let sanitized = input.trim().substring(0, maxLength);
 
     // Remove control characters except newline and tab
+    // eslint-disable-next-line no-control-regex
     sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 
     return sanitized;
@@ -182,9 +183,7 @@ export class AuthManager {
 
     // Check specific capability
     if (!agent.capabilities.includes(requiredCapability)) {
-      logger.warn(
-        `Authorization failed: ${agent.name} lacks capability '${requiredCapability}'`
-      );
+      logger.warn(`Authorization failed: ${agent.name} lacks capability '${requiredCapability}'`);
       return false;
     }
 
@@ -296,7 +295,11 @@ export class CredentialManager {
     }
 
     const value = newValue || crypto.randomBytes(32).toString('hex');
-    this.store(key, value, existing.expiresAt ? existing.expiresAt.getTime() - Date.now() : undefined);
+    this.store(
+      key,
+      value,
+      existing.expiresAt ? existing.expiresAt.getTime() - Date.now() : undefined
+    );
     logger.info(`Credential rotated: ${key}`);
   }
 
@@ -644,23 +647,32 @@ export class SecurityManager {
    */
   private startPeriodicCleanup(): void {
     // Clean up expired tokens every hour
-    setInterval(() => {
-      this.auth.cleanupExpired();
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        this.auth.cleanupExpired();
+      },
+      60 * 60 * 1000
+    );
 
     // Check credential rotation daily
-    setInterval(() => {
-      const needsRotation = this.credentials.checkRotation();
-      if (needsRotation.length > 0) {
-        logger.warn('Credentials need rotation:', needsRotation);
-      }
-    }, 24 * 60 * 60 * 1000);
+    setInterval(
+      () => {
+        const needsRotation = this.credentials.checkRotation();
+        if (needsRotation.length > 0) {
+          logger.warn('Credentials need rotation:', needsRotation);
+        }
+      },
+      24 * 60 * 60 * 1000
+    );
 
     // Verify audit log integrity hourly
-    setInterval(() => {
-      if (!this.auditLogger.verifyIntegrity()) {
-        logger.error('SECURITY ALERT: Audit log integrity compromised!');
-      }
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        if (!this.auditLogger.verifyIntegrity()) {
+          logger.error('SECURITY ALERT: Audit log integrity compromised!');
+        }
+      },
+      60 * 60 * 1000
+    );
   }
 }

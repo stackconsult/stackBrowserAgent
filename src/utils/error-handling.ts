@@ -579,13 +579,16 @@ export class EnhancedErrorManager extends EventEmitter {
     });
 
     // Check predictions periodically
-    setInterval(() => {
-      const predictions = this.predictor.predictErrors();
-      if (predictions.length > 0) {
-        logger.info('Error predictions:', predictions);
-        this.emit('predictions', predictions);
-      }
-    }, 5 * 60 * 1000); // Every 5 minutes
+    setInterval(
+      () => {
+        const predictions = this.predictor.predictErrors();
+        if (predictions.length > 0) {
+          logger.info('Error predictions:', predictions);
+          this.emit('predictions', predictions);
+        }
+      },
+      5 * 60 * 1000
+    ); // Every 5 minutes
   }
 
   /**

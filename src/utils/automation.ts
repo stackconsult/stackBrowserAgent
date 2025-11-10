@@ -328,7 +328,8 @@ export class StateMonitor extends EventEmitter {
 
 export class AutomationEngine extends EventEmitter {
   private rules: Map<string, AutomationRule> = new Map();
-  private schedules: Map<string, NodeJS.Timeout> = new Map();
+  // Reserved for future schedule-based automation
+  // private schedules: Map<string, NodeJS.Timeout> = new Map();
   private stateMonitor: StateMonitor;
 
   constructor(stateMonitor: StateMonitor) {

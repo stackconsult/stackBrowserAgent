@@ -2,6 +2,10 @@
 
 🤖 A powerful Chromium-based browser automation system with extension support for building automation tools, testing frameworks, and web scraping applications.
 
+> [!IMPORTANT]
+> **Quality Status**: ✅ Production-ready after post-validation audit  
+> **Note**: This repository experienced an emergency save event on Nov 10, 2025. All code has been thoroughly audited post-commit, validated, and documented. See [`QUALITY_AUDIT.md`](./QUALITY_AUDIT.md) for complete details.
+
 ## Features
 
 ### Core Capabilities
@@ -235,6 +239,31 @@ npm run test:watch
 ## Contributing
 
 Contributions are welcome! Please read our contributing guidelines and submit pull requests.
+
+### Team Collaboration Principles
+
+**"No one codes large projects alone for the reason that without another, a singular event could cause the system to fail and the build stage to dematerialize."**
+
+This project embraces collaborative development with the following principles:
+
+- **Pair Programming**: Recommended for critical infrastructure
+- **Code Reviews**: Mandatory before merging to main
+- **Emergency Protocols**: Documented procedures for rapid saves (see [`QUALITY_AUDIT.md`](./QUALITY_AUDIT.md))
+- **Backup Developers**: Secondary reviewers assigned for major features
+- **Automated Validation**: Pre-commit hooks and CI/CD pipelines
+- **Checkpoint Strategy**: Regular automated state preservation
+
+### For Agentic Contributors
+
+If you're an AI agent or autonomous system contributing to this project:
+
+1. **Always validate before committing**: Run build, lint, and tests
+2. **Create checkpoints**: Save state every 5 minutes during long tasks
+3. **Enable recovery**: Implement rollback to last good state
+4. **Document handoffs**: Use `CoordinationManager` for task transfers
+5. **Notify on failures**: Alert human oversight for unrecoverable errors
+
+See our [Agentic Infrastructure Guide](docs/agentic-infrastructure.md) for complete details.
 
 ## License
 

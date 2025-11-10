@@ -2,12 +2,7 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 import { BrowserConfig } from '../types';
 import { logger } from '../utils/logger';
 import { ExtensionLoader } from '../extensions/loader';
-import {
-  HealthMonitor,
-  RetryManager,
-  PerformanceTracker,
-  RecoveryStrategy,
-} from '../utils/health';
+import { HealthMonitor, RetryManager, PerformanceTracker } from '../utils/health';
 import { VersionManager } from '../utils/version';
 
 export class BrowserManager {
@@ -264,6 +259,13 @@ export class BrowserManager {
 
       throw error;
     }
+  }
+
+  /**
+   * Get launch attempt count for monitoring
+   */
+  getLaunchAttempts(): number {
+    return this.launchAttempts;
   }
 
   /**
