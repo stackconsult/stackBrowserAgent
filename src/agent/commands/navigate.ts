@@ -3,11 +3,11 @@ import { BaseCommand } from './base';
 import { logger } from '../../utils/logger';
 
 export class NavigateCommand extends BaseCommand {
-  async execute(command: AgentCommand): Promise<AgentResponse> {
+  async execute(command: AgentCommand<Record<string, unknown>>): Promise<AgentResponse> {
     try {
-      const { url } = command.payload;
+      const url = command.payload?.url as unknown;
 
-      if (!url) {
+      if (!url || typeof url !== 'string') {
         return {
           success: false,
           error: 'URL is required',

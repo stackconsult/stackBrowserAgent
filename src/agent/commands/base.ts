@@ -8,5 +8,5 @@ export abstract class BaseCommand {
     this.browserManager = browserManager;
   }
 
-  abstract execute(command: AgentCommand): Promise<AgentResponse>;
+  abstract execute(command: AgentCommand<Record<string, unknown>>): Promise<AgentResponse>;
 }

@@ -3,9 +3,10 @@ import { BaseCommand } from './base';
 import { logger } from '../../utils/logger';
 
 export class ScreenshotCommand extends BaseCommand {
-  async execute(command: AgentCommand): Promise<AgentResponse> {
+  async execute(command: AgentCommand<Record<string, unknown>>): Promise<AgentResponse> {
     try {
-      const { path, fullPage = false } = command.payload || {};
+      const path = command.payload?.path as unknown;
+      const fullPage = (command.payload?.fullPage as unknown) ?? false;
 
       const pages = await this.browserManager.getPages();
       if (pages.length === 0) {
@@ -16,11 +17,17 @@ export class ScreenshotCommand extends BaseCommand {
         };
       }
 
+      // Take screenshot without path first
       const screenshot = await pages[0].screenshot({
-        path,
-        fullPage,
+        fullPage: typeof fullPage === 'boolean' ? fullPage : false,
         encoding: 'base64',
       });
+
+      // If path is provided and valid, write to file separately
+      if (typeof path === 'string' && path.length > 0) {
+        const fs = await import('fs/promises');
+        await fs.writeFile(path, screenshot, 'base64');
+      }
 
       logger.info(`Screenshot taken${path ? ` and saved to ${path}` : ''}`);
 

@@ -39,15 +39,15 @@ export interface ExtensionManifest {
   permissions?: string[];
 }
 
-export interface AgentCommand {
+export interface AgentCommand<TPayload = Record<string, unknown>> {
   type: string;
-  payload?: any;
+  payload?: TPayload;
   id?: string;
 }
 
-export interface AgentResponse {
+export interface AgentResponse<TData = unknown> {
   success: boolean;
-  data?: any;
+  data?: TData;
   error?: string;
   commandId?: string;
 }
@@ -61,3 +61,8 @@ export interface SessionInfo {
   };
   extensions: string[];
 }
+
+// Export enhanced type systems
+export * from './type-guards';
+export * from './automation';
+export * from './coordination';
