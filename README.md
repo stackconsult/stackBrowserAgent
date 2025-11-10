@@ -4,7 +4,7 @@
 
 ## Features
 
-- ✅ **Chromium Browser Control**: Full control over Chromium browser via Puppeteer
+- ✅ **Chromium Browser Control**: Full control over Chromium browser via Puppeteer v24+
 - 🔌 **Extension Support**: Load and manage browser extensions dynamically
 - 🎯 **Command System**: Extensible command framework for automation tasks
 - 📝 **Structured Logging**: Winston-based logging with multiple outputs
@@ -12,6 +12,9 @@
 - 🎨 **TypeScript**: Full TypeScript support with type definitions
 - 🧪 **Testing Ready**: Jest configuration for unit and integration tests
 - 📚 **Well Documented**: Comprehensive documentation and examples
+- 🔄 **Self-Healing**: Automatic error recovery and health monitoring
+- 📊 **Performance Tracking**: Continuous monitoring with micro-improvement suggestions
+- 🔧 **Version Management**: Automatic Chromium/Puppeteer compatibility checking
 
 ## Quick Start
 
@@ -66,6 +69,7 @@ stackBrowserAgent/
 - 📖 [Setup Guide](docs/setup.md) - Detailed setup instructions
 - 🏗️ [Architecture](docs/architecture.md) - System architecture and design
 - 🔧 [Reassembly Guide](docs/reassembly.md) - Complete reassembly instructions
+- 🔄 [Self-Healing System](docs/self-healing.md) - Error recovery and performance optimization
 - 📊 [Repository Assessment](REPOSITORY_ASSESSMENT.md) - Project assessment and roadmap
 
 ## Configuration
@@ -112,6 +116,12 @@ console.log(result);
 
 // Stop the agent
 await agent.stop();
+
+// Access system health and performance
+const health = agent.getSystemHealth();
+console.log('Browser Health:', health.browser);
+console.log('Performance Metrics:', health.performance);
+console.log('Improvement Suggestions:', health.improvements);
 ```
 
 ## Available Commands
