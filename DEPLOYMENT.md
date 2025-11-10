@@ -33,7 +33,20 @@ docker-compose down
 
 ### Production Deployment
 
-#### Option 1: Railway
+#### Option 1: Railway (One-Click Deploy)
+
+Deploy instantly with Railway template:
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/3fjp1R?referralCode=yft2bJ&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+This will automatically:
+- Provision PostgreSQL database
+- Deploy FastAPI backend
+- Configure environment variables
+- Enable SSL/TLS
+- Provide deployment URL
+
+**Alternative - Railway CLI:**
 
 1. Install Railway CLI:
 ```bash

@@ -1,11 +1,20 @@
 """JWT token management."""
+import os
 from datetime import datetime, timedelta
 from typing import Optional, Dict
 from jose import jwt, JWTError
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "secret-key-change-in-production")
-JWT_ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Import settings for centralized configuration
+try:
+    from config.settings import settings
+    JWT_SECRET_KEY = settings.secret_key
+    JWT_ALGORITHM = settings.algorithm
+    ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
+except ImportError:
+    # Fallback for when settings is not available (e.g., during testing)
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "secret-key-change-in-production")
+    JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()

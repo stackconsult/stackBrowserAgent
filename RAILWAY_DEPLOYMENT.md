@@ -17,9 +17,16 @@ Complete guide for deploying stackBrowserAgent backend to Railway with one-click
 
 ### Method 1: One-Click Deploy Button
 
-**Coming Soon**: Click the button below to deploy instantly:
+Click the button below to deploy instantly:
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/stackconsult/stackBrowserAgent)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/3fjp1R?referralCode=yft2bJ&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+This will:
+- ✅ Automatically provision PostgreSQL database
+- ✅ Set up the FastAPI backend with all dependencies
+- ✅ Configure environment variables (you'll set JWT secret and optional API keys)
+- ✅ Deploy to Railway's infrastructure with SSL/TLS
+- ✅ Provide your deployment URL immediately
 
 ### Method 2: Manual Deploy via Railway Dashboard
 

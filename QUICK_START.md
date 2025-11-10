@@ -1,8 +1,29 @@
-# Quick Start Guide - 10 Minute Deployment
+# Quick Start Guide - 5 Minute Deployment
 
-Get stackBrowserAgent running in production in 10 minutes.
+Get stackBrowserAgent running in production in 5 minutes with one click.
 
-## Option 1: Automated Deployment (Recommended)
+## Option 1: One-Click Deploy (Fastest - 2 minutes)
+
+### Deploy Backend with Railway Template
+
+Click this button to deploy instantly:
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/3fjp1R?referralCode=yft2bJ&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+What happens:
+1. ✅ Railway provisions PostgreSQL automatically
+2. ✅ Backend deploys with all dependencies
+3. ✅ Environment variables configured
+4. ✅ SSL/TLS enabled automatically
+5. ✅ Get your deployment URL immediately
+
+**Time**: ~2 minutes
+
+Then continue to [Step 2: Setup Extension](#step-2-setup-extension-2-minutes)
+
+---
+
+## Option 2: Automated Script Deployment
 
 ### One-Command Deployment
 
@@ -30,7 +51,7 @@ The script will:
 
 ---
 
-## Option 2: Manual Deployment
+## Option 3: Manual Deployment
 
 ### Step 1: Deploy Backend (3 minutes)
 

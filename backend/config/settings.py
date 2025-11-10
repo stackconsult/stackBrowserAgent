@@ -2,9 +2,13 @@
 Configuration settings for the backend system.
 Uses Pydantic Settings for environment variable management.
 """
+import os
+import logging
 from typing import Optional
 from pydantic_settings import BaseSettings
 from pydantic import Field
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -26,8 +30,26 @@ class Settings(BaseSettings):
         env="DATABASE_URL"
     )
     
-    # Authentication
-    secret_key: str = Field(..., env="SECRET_KEY")
+    # Authentication (supports both SECRET_KEY and JWT_SECRET_KEY)
+    _secret_key_cache: Optional[str] = None
+    
+    @property
+    def secret_key(self) -> str:
+        """Get secret key from JWT_SECRET_KEY or SECRET_KEY environment variable."""
+        if self._secret_key_cache is not None:
+            return self._secret_key_cache
+            
+        key = os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY")
+        if not key:
+            # Allow default in development, but warn in production
+            if os.getenv("ENVIRONMENT", "development").lower() == "production":
+                logger.critical("⚠️  SECURITY WARNING: Using default JWT secret key in production! Set JWT_SECRET_KEY environment variable.")
+            key = "change-me-in-production"
+        
+        # Cache the result
+        object.__setattr__(self, '_secret_key_cache', key)
+        return key
+    
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
