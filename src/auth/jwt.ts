@@ -1,25 +1,45 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
-import type { StringValue } from 'ms';
+import jwt, { SignOptions, JwtPayload as JwtLibPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import type ms from 'ms';
+
+// Type alias for cleaner code
+type StringValue = ms.StringValue;
+
+// Extend Express Request to include user payload
+export interface AuthenticatedRequest extends Request {
+  user?: JWTPayload;
+}
 
 // JWT configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production';
+const JWT_EXPIRATION: StringValue = (process.env.JWT_EXPIRATION || '24h') as StringValue;
 
-export interface JWTPayload {
+// Validate JWT_SECRET on module load (production safety check)
+if (process.env.NODE_ENV === 'production' && JWT_SECRET === 'default-secret-change-in-production') {
+  console.error('FATAL ERROR: JWT_SECRET not set in production environment!');
+  process.exit(1);
+}
+
+// Validate JWT_EXPIRATION format
+const VALID_EXPIRATION_PATTERN = /^\d+[smhdwy]$/;
+if (!VALID_EXPIRATION_PATTERN.test(JWT_EXPIRATION)) {
+  console.warn(`WARNING: JWT_EXPIRATION "${JWT_EXPIRATION}" may not be valid. Use format like: 1h, 24h, 7d, 30d`);
+}
+
+export interface JWTPayload extends JwtLibPayload {
   userId: string;
   role?: string;
-  [key: string]: any;
 }
 
 /**
- * Generate a JWT token
+ * Generate a JWT token with configurable expiration
  * @param payload - Data to encode in the token
+ * @param expiresIn - Optional expiration time (e.g., '1h', '24h', '7d'). Defaults to JWT_EXPIRATION env var.
  * @returns Signed JWT token
  */
-export function generateToken(payload: JWTPayload): string {
-  const expiresIn: StringValue = (process.env.JWT_EXPIRATION || '24h') as StringValue;
+export function generateToken(payload: JWTPayload, expiresIn?: SignOptions['expiresIn']): string {
   const options: SignOptions = {
-    expiresIn,
+    expiresIn: expiresIn || JWT_EXPIRATION,
   };
   return jwt.sign(payload, JWT_SECRET, options);
 }
@@ -31,20 +51,27 @@ export function generateToken(payload: JWTPayload): string {
  */
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    return decoded;
   } catch (error) {
+    // Log error details for debugging (without exposing sensitive info)
+    if (error instanceof Error) {
+      console.warn(`JWT verification failed: ${error.message}`);
+    }
     return null;
   }
 }
 
 /**
  * Express middleware to authenticate requests using JWT
+ * Verifies the JWT token from Authorization header and attaches user payload to request
  */
-export function authenticateToken(req: Request, res: Response, next: NextFunction): void {
+export function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {
+    console.warn(`Authentication failed: No token provided for ${req.method} ${req.path}`);
     res.status(401).json({ error: 'No token provided' });
     return;
   }
@@ -52,12 +79,13 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
   const payload = verifyToken(token);
   
   if (!payload) {
+    console.warn(`Authentication failed: Invalid token for ${req.method} ${req.path}`);
     res.status(403).json({ error: 'Invalid or expired token' });
     return;
   }
 
   // Attach payload to request object for use in routes
-  (req as any).user = payload;
+  req.user = payload;
   next();
 }
 
