@@ -90,7 +90,18 @@ Authorization: Bearer <your-jwt-token>
 
 ### Option 1: One-Click Deploy
 
-Click the "Deploy on Railway" button above to deploy instantly.
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/stackconsult/stackBrowserAgent)
+
+Click the button above to deploy instantly to Railway. The deployment will:
+- Automatically build the TypeScript application
+- Generate a secure JWT secret (or you can provide your own)
+- Expose the API on a public URL
+
+After deployment:
+1. Railway will automatically set a `JWT_SECRET` for you
+2. Your application will be available at: `https://your-app.railway.app`
+3. Test it: `https://your-app.railway.app/health`
+4. Get a demo token: `https://your-app.railway.app/auth/demo-token`
 
 ### Option 2: Railway CLI
 
