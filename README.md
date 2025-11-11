@@ -11,6 +11,7 @@ Browser Agent with JWT Authentication and Railway Deployment
 - 🐳 Docker containerization
 - 📝 TypeScript for type safety
 - ⚡ Fast development with ts-node
+- 🛡️ Rate limiting for security (100 req/15min, 10 auth req/15min)
 
 ## Quick Start
 
@@ -169,6 +170,20 @@ Generate a secure secret:
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+
+### Rate Limiting
+
+The application includes built-in rate limiting for security:
+
+- **General endpoints**: 100 requests per 15 minutes per IP
+- **Authentication endpoints**: 10 requests per 15 minutes per IP
+
+Rate limits help prevent:
+- Brute force attacks on authentication
+- Denial of service (DoS) attacks
+- API abuse
+
+If you need to adjust rate limits, modify the `limiter` and `authLimiter` configurations in `src/index.ts`.
 
 ## License
 
