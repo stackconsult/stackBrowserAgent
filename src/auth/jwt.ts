@@ -8,7 +8,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-productio
 export interface JWTPayload {
   userId: string;
   role?: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
+}
+
+// Extend Express Request interface to include user property
+export interface AuthenticatedRequest extends Request {
+  user?: JWTPayload;
 }
 
 /**
@@ -57,7 +62,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
   }
 
   // Attach payload to request object for use in routes
-  (req as any).user = payload;
+  (req as AuthenticatedRequest).user = payload;
   next();
 }
 
