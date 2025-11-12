@@ -34,6 +34,12 @@ if (!VALID_EXPIRATION_PATTERN.test(JWT_EXPIRATION)) {
 export interface JWTPayload extends JwtLibPayload {
   userId: string;
   role?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
+// Extend Express Request interface to include user property
+export interface AuthenticatedRequest extends Request {
+  user?: JWTPayload;
 }
 
 /**
@@ -95,6 +101,7 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
 
   // Attach payload to request object for use in routes
   req.user = payload;
+  (req as AuthenticatedRequest).user = payload;
   next();
 }
 

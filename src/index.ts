@@ -4,6 +4,11 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { generateToken, generateDemoToken, authenticateToken, AuthenticatedRequest, validateJwtConfig } from './auth/jwt';
+import { generateToken, generateDemoToken, authenticateToken, AuthenticatedRequest } from './auth/jwt';
+import { validateRequest, schemas } from './middleware/validation';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { logger } from './utils/logger';
+import { getHealthStatus } from './utils/health';
 
 // Load environment variables
 dotenv.config();
@@ -38,21 +43,37 @@ app.use(helmet()); // Security headers
 app.use(express.json());
 app.use(limiter); // Apply rate limiting to all routes
 
-// Health check endpoint
-app.get('/health', (req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Request logging middleware
+app.use((req: Request, res: Response, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.info('Request completed', {
+      method: req.method,
+      path: req.path,
+      status: res.statusCode,
+      duration: `${duration}ms`,
+      ip: req.ip,
+    });
+  });
+  next();
 });
 
-// Generate token endpoint (for testing) - with stricter rate limiting
-app.post('/auth/token', authLimiter, (req: Request, res: Response) => {
-  const { userId, role } = req.body;
-  
-  if (!userId) {
-    res.status(400).json({ error: 'userId is required' });
-    return;
-  }
+// Health check endpoint with enhanced metrics
+app.get('/health', (req: Request, res: Response) => {
+  const health = getHealthStatus();
+  const statusCode = health.status === 'ok' ? 200 : 503;
+  res.status(statusCode).json(health);
+});
 
-  const token = generateToken({ userId, role: role || 'user' });
+// Generate token endpoint (for testing) - with stricter rate limiting and validation
+app.post('/auth/token', authLimiter, validateRequest(schemas.generateToken), (req: Request, res: Response) => {
+  const { userId, role } = req.body;
+
+  const token = generateToken({ userId, role });
+  
+  logger.info('Token generated', { userId, role });
+  
   res.json({ token });
 });
 
@@ -68,9 +89,11 @@ app.get('/auth/demo-token', authLimiter, (req: Request, res: Response) => {
 // Protected route example
 app.get('/api/protected', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
   const user = req.user;
+app.get('/api/protected', authenticateToken, (req: Request, res: Response) => {
+  const authenticatedReq = req as AuthenticatedRequest;
   res.json({ 
     message: 'Access granted to protected resource',
-    user 
+    user: authenticatedReq.user 
   });
 });
 
@@ -79,12 +102,28 @@ app.get('/api/agent/status', authenticateToken, (req: AuthenticatedRequest, res:
   res.json({
     status: 'running',
     user: req.user,
+app.get('/api/agent/status', authenticateToken, (req: Request, res: Response) => {
+  const authenticatedReq = req as AuthenticatedRequest;
+  res.json({
+    status: 'running',
+    user: authenticatedReq.user,
     timestamp: new Date().toISOString()
   });
 });
 
+// 404 handler - must be after all routes
+app.use(notFoundHandler);
+
+// Global error handler - must be last
+app.use(errorHandler);
+
 // Start server
 app.listen(PORT, () => {
+  logger.info(`Server started`, {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    nodeVersion: process.version,
+  });
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
