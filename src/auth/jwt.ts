@@ -12,16 +12,21 @@ export interface AuthenticatedRequest extends Request {
 
 // JWT configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production';
-const JWT_EXPIRATION: StringValue = (process.env.JWT_EXPIRATION || '24h') as StringValue;
+const JWT_EXPIRATION = (process.env.JWT_EXPIRATION || '24h') as StringValue;
 
-// Validate JWT_SECRET on module load (production safety check)
-if (process.env.NODE_ENV === 'production' && JWT_SECRET === 'default-secret-change-in-production') {
-  console.error('FATAL ERROR: JWT_SECRET not set in production environment!');
-  process.exit(1);
+/**
+ * Validate JWT configuration (should be called after logging is set up)
+ * Call this during application startup to ensure JWT_SECRET is set in production.
+ */
+export function validateJwtConfig(): void {
+  if (process.env.NODE_ENV === 'production' && JWT_SECRET === 'default-secret-change-in-production') {
+    console.error('FATAL ERROR: JWT_SECRET not set in production environment! The application will now exit.');
+    process.exit(1);
+  }
 }
 
-// Validate JWT_EXPIRATION format
-const VALID_EXPIRATION_PATTERN = /^\d+[smhdwy]$/;
+// Validate JWT_EXPIRATION format - accepts formats like: 100ms, 1.5h, 2d, 1 hour, 2 days
+const VALID_EXPIRATION_PATTERN = /^\d+(\.\d+)?\s*[a-z]+$/i;
 if (!VALID_EXPIRATION_PATTERN.test(JWT_EXPIRATION)) {
   console.warn(`WARNING: JWT_EXPIRATION "${JWT_EXPIRATION}" may not be valid. Use format like: 1h, 24h, 7d, 30d`);
 }
@@ -71,7 +76,9 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {
-    console.warn(`Authentication failed: No token provided for ${req.method} ${req.path}`);
+    // Use route pattern instead of actual path to avoid logging sensitive query params
+    const routePath = req.route?.path || req.path;
+    console.warn(`Authentication failed: No token provided for ${req.method} ${routePath}`);
     res.status(401).json({ error: 'No token provided' });
     return;
   }
@@ -79,7 +86,9 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
   const payload = verifyToken(token);
   
   if (!payload) {
-    console.warn(`Authentication failed: Invalid token for ${req.method} ${req.path}`);
+    // Use route pattern instead of actual path to avoid logging sensitive query params
+    const routePath = req.route?.path || req.path;
+    console.warn(`Authentication failed: Invalid token for ${req.method} ${routePath}`);
     res.status(403).json({ error: 'Invalid or expired token' });
     return;
   }

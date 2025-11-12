@@ -3,10 +3,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import { generateToken, generateDemoToken, authenticateToken, AuthenticatedRequest } from './auth/jwt';
+import { generateToken, generateDemoToken, authenticateToken, AuthenticatedRequest, validateJwtConfig } from './auth/jwt';
 
 // Load environment variables
 dotenv.config();
+
+// Validate JWT configuration early
+validateJwtConfig();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,8 +33,8 @@ const authLimiter = rateLimit({
 });
 
 // Middleware
-app.use(helmet()); // Security headers
 app.use(cors());
+app.use(helmet()); // Security headers
 app.use(express.json());
 app.use(limiter); // Apply rate limiting to all routes
 
