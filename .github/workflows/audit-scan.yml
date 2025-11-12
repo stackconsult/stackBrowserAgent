@@ -12,6 +12,11 @@ on:
       - main
       - develop
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 jobs:
   discovery:
     name: Discovery - Enumerate Files
