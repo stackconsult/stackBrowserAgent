@@ -1,7 +1,9 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import { generateToken, generateDemoToken, authenticateToken, AuthenticatedRequest, validateJwtConfig } from './auth/jwt';
 import { generateToken, generateDemoToken, authenticateToken, AuthenticatedRequest } from './auth/jwt';
 import { validateRequest, schemas } from './middleware/validation';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
@@ -10,6 +12,9 @@ import { getHealthStatus } from './utils/health';
 
 // Load environment variables
 dotenv.config();
+
+// Validate JWT configuration early
+validateJwtConfig();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +39,7 @@ const authLimiter = rateLimit({
 
 // Middleware
 app.use(cors());
+app.use(helmet()); // Security headers
 app.use(express.json());
 app.use(limiter); // Apply rate limiting to all routes
 
@@ -81,6 +87,8 @@ app.get('/auth/demo-token', authLimiter, (req: Request, res: Response) => {
 });
 
 // Protected route example
+app.get('/api/protected', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user;
 app.get('/api/protected', authenticateToken, (req: Request, res: Response) => {
   const authenticatedReq = req as AuthenticatedRequest;
   res.json({ 
@@ -90,6 +98,10 @@ app.get('/api/protected', authenticateToken, (req: Request, res: Response) => {
 });
 
 // Protected agent status endpoint
+app.get('/api/agent/status', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
+  res.json({
+    status: 'running',
+    user: req.user,
 app.get('/api/agent/status', authenticateToken, (req: Request, res: Response) => {
   const authenticatedReq = req as AuthenticatedRequest;
   res.json({

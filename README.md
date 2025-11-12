@@ -12,6 +12,8 @@ Browser Agent with JWT Authentication and Railway Deployment
 - 📝 TypeScript for type safety
 - ⚡ Fast development with ts-node
 - 🛡️ Rate limiting for security (100 req/15min, 10 auth req/15min)
+- 🔒 Security headers with Helmet
+- ✅ Production-ready with security validations
 - ✅ Comprehensive test suite with Jest (94% coverage)
 - 🔍 Input validation with Joi schemas
 - 📊 Structured logging with Winston
@@ -41,9 +43,12 @@ cp .env.example .env
 
 4. Update `.env` with your JWT secret:
 ```env
-JWT_SECRET=your-secure-secret-key
+# Generate a secure secret with:
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+JWT_SECRET=your-secure-secret-key-replace-this
 JWT_EXPIRATION=24h
 PORT=3000
+NODE_ENV=development
 ```
 
 5. Run in development mode:
@@ -198,11 +203,20 @@ docker run -p 3000:3000 \
   stackbrowseragent
 ```
 
-## Security Notes
+## Security
 
 ⚠️ **Important**: Always set a strong `JWT_SECRET` in production. Never use the default value.
 
-Generate a secure secret:
+### Security Features
+
+1. **JWT Authentication**: All protected routes require valid JWT tokens
+2. **Rate Limiting**: Protection against brute force and DoS attacks
+3. **Security Headers**: Helmet middleware for common vulnerability protection
+4. **Input Validation**: Request validation and sanitization
+5. **Production Checks**: Automatic validation of JWT_SECRET in production mode
+
+### Generate Secure JWT Secret
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
@@ -221,6 +235,15 @@ Rate limits help prevent:
 
 If you need to adjust rate limits, modify the `limiter` and `authLimiter` configurations in `src/index.ts`.
 
+### Security Headers (Helmet)
+
+Automatically configured security headers include:
+- X-Content-Type-Options (prevents MIME sniffing)
+- X-Frame-Options (prevents clickjacking)
+- Strict-Transport-Security (enforces HTTPS)
+- Content-Security-Policy (controls resource loading)
+
+For detailed security information, see [SECURITY.md](SECURITY.md).
 ## Documentation
 
 - **[API Reference](API.md)** - Complete API documentation with examples
