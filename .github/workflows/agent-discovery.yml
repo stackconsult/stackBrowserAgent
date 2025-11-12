@@ -27,6 +27,9 @@ on:
         description: 'Detected framework type'
         value: ${{ jobs.discover-framework.outputs.framework }}
 
+permissions:
+  contents: read
+
 jobs:
   discover-framework:
     runs-on: ubuntu-latest

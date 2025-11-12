@@ -161,7 +161,34 @@ Complex multi-line heredoc patterns incompatible with GitHub Actions YAML parser
      run: bash .github/scripts/generate-docs.sh
    ```
 
-### Issue 5: TypeScript Version Mismatch ⚠️ WARNING
+### Issue 5: Missing Workflow Permissions ✅ FIXED
+**Severity:** Medium (Security)  
+**Impact:** CodeQL security alert
+
+**Alert Details:**
+```
+[actions/missing-workflow-permissions] Actions job or workflow does not 
+limit the permissions of the GITHUB_TOKEN.
+```
+
+**Files Affected:**
+- `agent-orchestrator.yml` - Missing top-level permissions
+- `agent-discovery.yml` - Missing top-level permissions
+
+**Fix Applied:**
+Added minimal permissions blocks to both workflows:
+```yaml
+permissions:
+  contents: read
+  actions: read  # For agent-orchestrator
+```
+
+**Verification:**
+- ✅ CodeQL analysis: 0 alerts
+- ✅ Workflows parse correctly
+- ✅ All tests pass
+
+### Issue 6: TypeScript Version Mismatch ⚠️ WARNING
 **Severity:** Very Low  
 **Impact:** ESLint warning during build
 
@@ -409,8 +436,8 @@ $ for file in .github/workflows/*.yml; do
 2. `COMPREHENSIVE_AUDIT_REPORT.md` - This document
 
 ### Files Modified
-1. `.github/workflows/agent-discovery.yml` - Removed trailing spaces
-2. `.github/workflows/agent-orchestrator.yml` - Removed trailing spaces
+1. `.github/workflows/agent-discovery.yml` - Removed trailing spaces, added permissions
+2. `.github/workflows/agent-orchestrator.yml` - Removed trailing spaces, added permissions
 3. `.github/workflows/audit-classify.yml` - Removed trailing spaces
 4. `.github/workflows/audit-fix.yml` - Removed trailing spaces
 5. `.github/workflows/audit-scan.yml` - Removed trailing spaces
@@ -469,9 +496,11 @@ $ for file in .github/workflows/*.yml; do
 ### What Was Fixed
 ✅ **YAML Trailing Spaces** - Removed from all 8 workflow files  
 ✅ **YAML Lint Config** - Created `.yamllint` with reasonable rules  
+✅ **Workflow Permissions** - Added proper permissions to agent workflows (security fix)  
 ✅ **Documentation** - Created comprehensive audit report  
 ✅ **Verification** - All workflows parse correctly  
 ✅ **Testing** - All 23 tests pass with good coverage  
+✅ **Security** - CodeQL analysis shows 0 alerts  
 
 ### What Was Documented
 📝 **Phantom Checks** - Explained they're not from this repository  

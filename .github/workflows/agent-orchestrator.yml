@@ -27,6 +27,10 @@ on:
           - standalone
           - multi-agent
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   requirements-analysis:
     name: Stage 1 - Requirements Analysis
