@@ -237,8 +237,6 @@ stackBrowserAgent/
 - `ts-node` - Development server
 - `eslint` - Code linting
 - `@types/*` - TypeScript definitions
-- `@types/*` - TypeScript definitions
-
 ---
 
 ## Commits
