@@ -156,6 +156,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:3000/api/protected
 - **A05: Security Misconfiguration**: Production validation checks
 - **A06: Vulnerable Components**: Regular npm audit, zero vulnerabilities
 - **A07: Authentication Failures**: Rate limiting on auth endpoints
+- **A08: Software and Data Integrity Failures**: All dependencies are installed from trusted sources and verified via npm. No dynamic code loading or unsigned plugins are used. CI/CD pipelines are protected and only signed code is deployed.
 - **A09: Security Logging**: Authentication failures logged
 - **A10: SSRF**: No external requests from user input
 
