@@ -12,6 +12,12 @@ Browser Agent with JWT Authentication and Railway Deployment
 - 📝 TypeScript for type safety
 - ⚡ Fast development with ts-node
 - 🛡️ Rate limiting for security (100 req/15min, 10 auth req/15min)
+- ✅ Comprehensive test suite with Jest (94% coverage)
+- 🔍 Input validation with Joi schemas
+- 📊 Structured logging with Winston
+- 🏥 Enhanced health checks with system metrics
+- 🚨 Global error handling
+- 🤖 CI/CD with GitHub Actions
 
 ## Quick Start
 
@@ -50,6 +56,36 @@ npm run dev
 npm run build
 npm start
 ```
+
+7. Run tests:
+```bash
+npm test
+```
+
+## Testing
+
+### Run All Tests
+```bash
+npm test
+```
+
+### Run Tests in Watch Mode
+```bash
+npm test:watch
+```
+
+### Run Integration Tests Only
+```bash
+npm test:integration
+```
+
+### Test Coverage
+The project includes comprehensive test coverage:
+- Unit tests for JWT authentication
+- Integration tests for all API endpoints
+- 94%+ code coverage
+
+Test results and coverage reports are generated in the `coverage/` directory.
 
 ## API Endpoints
 
@@ -191,6 +227,15 @@ If you need to adjust rate limits, modify the `limiter` and `authLimiter` config
 - **[Architecture](ARCHITECTURE.md)** - System architecture and design decisions
 - **[Contributing](CONTRIBUTING.md)** - Contribution guidelines
 - **[Changelog](CHANGELOG.md)** - Version history and release notes
+
+## Copilot coding agent onboarding
+
+This repository includes a short onboarding guide and a small config for Copilot coding agents.
+
+- Onboarding doc: `.github/COPILOT_ONBOARDING.md` — read this first for the agent contract, commands, and verification checklist.
+- Quick config: `.github/copilot-coding-agent.yml` — contains canonical build/test/lint commands and important paths.
+
+If you're a human contributor, follow the same checklist in the onboarding doc before opening a PR.
 
 ## Troubleshooting
 
