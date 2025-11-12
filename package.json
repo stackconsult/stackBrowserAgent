@@ -3,21 +3,45 @@
   "version": "1.0.0",
   "description": "Browser Agent with JWT Authentication",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "lint": "eslint src --ext .ts",
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "echo \"No tests specified\" && exit 0",
+    "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
     "browser",
     "automation",
     "agent",
-    "jwt"
+    "jwt",
+    "express",
+    "typescript",
+    "authentication",
+    "api",
+    "rest",
+    "nodejs"
   ],
-  "author": "",
+  "author": "stackconsult",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stackconsult/stackBrowserAgent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stackconsult/stackBrowserAgent/issues"
+  },
+  "homepage": "https://github.com/stackconsult/stackBrowserAgent#readme",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "API.md",
+    "ARCHITECTURE.md",
+    "CHANGELOG.md"
+  ],
   "dependencies": {
     "@types/ms": "^2.1.0",
     "cors": "^2.8.5",

@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import { generateToken, generateDemoToken, authenticateToken } from './auth/jwt';
+import { generateToken, generateDemoToken, authenticateToken, AuthenticatedRequest } from './auth/jwt';
 
 // Load environment variables
 dotenv.config();
@@ -62,18 +62,19 @@ app.get('/auth/demo-token', authLimiter, (req: Request, res: Response) => {
 
 // Protected route example
 app.get('/api/protected', authenticateToken, (req: Request, res: Response) => {
-  const user = (req as any).user;
+  const authenticatedReq = req as AuthenticatedRequest;
   res.json({ 
     message: 'Access granted to protected resource',
-    user 
+    user: authenticatedReq.user 
   });
 });
 
 // Protected agent status endpoint
 app.get('/api/agent/status', authenticateToken, (req: Request, res: Response) => {
+  const authenticatedReq = req as AuthenticatedRequest;
   res.json({
     status: 'running',
-    user: (req as any).user,
+    user: authenticatedReq.user,
     timestamp: new Date().toISOString()
   });
 });
