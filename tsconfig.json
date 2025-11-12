@@ -15,6 +15,23 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests", "**/*.test.ts", "**/*.spec.ts"]
+  "include": ["src/auth/**/*", "src/index.ts", "src/middleware/**/*", "src/utils/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/agents",
+    "src/automation",
+    "src/background",
+    "src/config",
+    "src/content",
+    "src/llm",
+    "src/popup",
+    "src/services",
+    "src/sidepanel",
+    "src/types",
+    "src/workflow"
+  ]
 }
