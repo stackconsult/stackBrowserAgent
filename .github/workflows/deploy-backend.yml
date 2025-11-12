@@ -79,6 +79,8 @@ jobs:
   deploy-status:
     needs: build-and-push
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Deployment success notification
         run: |
