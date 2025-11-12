@@ -22,7 +22,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download scan artifacts from workflow run
         if: github.event_name == 'workflow_run'
@@ -73,7 +73,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download consolidated results
         uses: actions/download-artifact@v4
@@ -145,7 +145,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download consolidated results
         uses: actions/download-artifact@v4
@@ -207,7 +207,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download consolidated results
         uses: actions/download-artifact@v4
@@ -264,7 +264,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download all classifications
         uses: actions/download-artifact@v4
