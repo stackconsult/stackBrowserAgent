@@ -169,7 +169,7 @@ jobs:
               fi
               
               # Create backend connection config
-              cat > ui/backend-config.json << EOF
+              cat > ui/backend-config.json << 'EOF'
 {
   "backend_url": "http://localhost:8000",
   "api_base": "/api/v1",
@@ -193,7 +193,7 @@ EOF
               fi
               
               # Create data provider config
-              cat > ui/data-provider.config.js << EOF
+              cat > ui/data-provider.config.js << 'EOF'
 export const dataProvider = {
   baseUrl: 'http://localhost:8000/api/v1',
   endpoints: {
