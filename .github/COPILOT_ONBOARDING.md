@@ -21,7 +21,7 @@ Important commands
 - Build: `npm run build` (uses `tsc`)
 - Dev: `npm run dev` (ts-node)
 - Lint: `npm run lint` (eslint)
-- Test: `npm test` (placeholder — repo currently has no automated tests)
+- Test: `npm test` (runs Jest test suite with coverage reporting)
 
 Files & areas of concern
 - Core source: `src/` — preferred area for code changes.
