@@ -1,11 +1,13 @@
 {
   "name": "stackbrowseragent",
   "version": "1.0.0",
-  "description": "Browser Agent with JWT Authentication",
+  "description": "Browser Agent with JWT Authentication and Extension",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
+    "build:extension": "cd extension && npm run build",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "lint": "eslint src --ext .ts",
@@ -24,7 +26,8 @@
     "authentication",
     "api",
     "rest",
-    "nodejs"
+    "nodejs",
+    "chrome-extension"
   ],
   "author": "stackconsult",
   "license": "ISC",
