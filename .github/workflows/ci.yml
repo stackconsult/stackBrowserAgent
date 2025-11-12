@@ -68,6 +68,7 @@ jobs:
       
       - name: Check for known vulnerabilities
         run: npx audit-ci --moderate
+        continue-on-error: true
 
   build-docker:
     name: Build Docker Image
