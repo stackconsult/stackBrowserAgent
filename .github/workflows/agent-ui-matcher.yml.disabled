@@ -165,18 +165,19 @@ jobs:
               # Copy UI files to ui directory
               if [ -d "/tmp/ui-framework" ]; then
                 cp -r /tmp/ui-framework/* ui/
-                echo "✅ Copied UI framework files to \`ui/\` directory" >> $GITHUB_STEP_SUMMARY
+                echo "✅ Copied UI framework files to ui/ directory" >> $GITHUB_STEP_SUMMARY
               fi
               
               # Create backend connection config
-              cat > ui/backend-config.json << 'EOF'
+              mkdir -p ui
+              cat > ui/backend-config.json <<'ENDCONFIG'
 {
   "backend_url": "http://localhost:8000",
   "api_base": "/api/v1",
   "websocket_url": "ws://localhost:8000/ws",
   "auth_enabled": false
 }
-EOF
+ENDCONFIG
               echo "✅ Created backend connection configuration" >> $GITHUB_STEP_SUMMARY
               
               # Update package.json if it exists
@@ -189,11 +190,12 @@ EOF
               # Dashboard UI integration
               if [ -d "/tmp/ui-framework" ]; then
                 cp -r /tmp/ui-framework/* ui/
-                echo "✅ Copied dashboard framework to \`ui/\` directory" >> $GITHUB_STEP_SUMMARY
+                echo "✅ Copied dashboard framework to ui/ directory" >> $GITHUB_STEP_SUMMARY
               fi
               
               # Create data provider config
-              cat > ui/data-provider.config.js << 'EOF'
+              mkdir -p ui
+              cat > ui/data-provider.config.js <<'ENDPROVIDER'
 export const dataProvider = {
   baseUrl: 'http://localhost:8000/api/v1',
   endpoints: {
@@ -203,7 +205,7 @@ export const dataProvider = {
     metrics: '/metrics'
   }
 };
-EOF
+ENDPROVIDER
               echo "✅ Created data provider configuration" >> $GITHUB_STEP_SUMMARY
               ;;
               
@@ -217,7 +219,7 @@ EOF
               # Create minimal Vite + React setup
               mkdir -p ui/src
               
-              cat > ui/package.json << 'EOF'
+              cat > ui/package.json <<'ENDPACKAGE'
 {
   "name": "agent-ui",
   "version": "1.0.0",
@@ -236,9 +238,9 @@ EOF
     "vite": "^5.0.0"
   }
 }
-EOF
+ENDPACKAGE
               
-              cat > ui/vite.config.js << 'EOF'
+              cat > ui/vite.config.js <<'ENDVITE'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -254,9 +256,9 @@ export default defineConfig({
     }
   }
 })
-EOF
+ENDVITE
               
-              cat > ui/src/App.jsx << 'EOF'
+              cat > ui/src/App.jsx <<'ENDAPP'
 import { useState, useEffect } from 'react'
 
 function App() {
@@ -278,7 +280,7 @@ function App() {
 }
 
 export default App
-EOF
+ENDAPP
               
               echo "✅ Created minimal Vite + React UI setup" >> $GITHUB_STEP_SUMMARY
               echo "✅ Configured proxy to backend at :8000" >> $GITHUB_STEP_SUMMARY
@@ -299,7 +301,7 @@ EOF
           # Create backend API configuration
           mkdir -p backend/config
           
-          cat > backend/config/cors.json << 'EOF'
+          cat > backend/config/cors.json <<'ENDCORS'
 {
   "allowed_origins": [
     "http://localhost:3000",
@@ -311,13 +313,13 @@ EOF
   "expose_headers": ["X-Total-Count"],
   "allow_credentials": true
 }
-EOF
+ENDCORS
           echo "✅ Created CORS configuration" >> $GITHUB_STEP_SUMMARY
           
           # Create API routes structure
           mkdir -p backend/routes
           
-          cat > backend/routes/health.py << 'EOF'
+          cat > backend/routes/health.py <<'ENDHEALTH'
 from fastapi import APIRouter
 
 router = APIRouter()
@@ -329,7 +331,7 @@ async def health_check():
 @router.get("/ready")
 async def readiness_check():
     return {"ready": True}
-EOF
+ENDHEALTH
           echo "✅ Created health check endpoints" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
