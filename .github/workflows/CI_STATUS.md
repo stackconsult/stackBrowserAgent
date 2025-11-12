@@ -3,18 +3,24 @@
 ## ✅ Active and Functional Workflows
 
 ### 1. **CI/CD** (`ci.yml`)
-- **Status**: ✅ Passing
+- **Status**: ✅ Passing (Fixed Nov 12, 2025)
 - **Triggers**: Push/PR to `main` and `develop` branches
 - **Jobs**:
-  - `Test (18.x)`: Node.js 18.x tests
-  - `Test (20.x)`: Node.js 20.x tests  
-  - `Security Audit`: npm audit and vulnerability checks
+  - `Test (18.x)`: Node.js 18.x tests - Uses npm ci for consistent builds
+  - `Test (20.x)`: Node.js 20.x tests - Uses npm ci for consistent builds
+  - `Security Audit`: npm audit and audit-ci vulnerability checks
   - `Build Docker Image`: Docker build (main branch only)
+- **Recent Fixes**:
+  - Added `audit-ci` to devDependencies for reliable security scanning
+  - Changed all jobs to use `npm ci` instead of `npm install`
+  - Made codecov upload non-blocking with `fail_ci_if_error: false`
+  - Improved security audit error handling
 
 ### 2. **Security Scanning**
 - **Status**: ✅ Passing
-- **Tools**: npm audit, CodeQL, Trivy
+- **Tools**: npm audit, audit-ci, CodeQL
 - **Coverage**: JavaScript/TypeScript security analysis
+- **Changes**: Now uses consistent npm ci and has proper error handling
 
 ### 3. **Deploy Backend to GitHub Container Registry**
 - **Status**: ✅ Passing
@@ -47,7 +53,28 @@ The following checks do NOT exist in this repository:
 
 ## 🔧 Recent Fixes Applied
 
-### 1. Removed Python Setup from agent-orchestrator.yml
+### 1. Fixed Recurring CI/CD Failures (Nov 12, 2025)
+**Issues:**
+- Security Audit job failing after 6s
+- Test (20.x) job failing after 6s
+- Test (18.x) job cancelled after 8s
+- Build Docker Image being skipped
+
+**Root Causes Fixed:**
+- `audit-ci` package not in devDependencies (caused npx delays/failures)
+- Codecov upload blocking test completion without token
+- Inconsistent use of `npm install` vs `npm ci`
+- Audit workflow artifact paths didn't match actual artifact structure
+
+**Solutions Applied:**
+1. Added `audit-ci` to devDependencies with npm script
+2. Made codecov upload non-blocking: `fail_ci_if_error: false` + `continue-on-error: true`
+3. Changed all workflow jobs to use `npm ci` for faster, consistent builds
+4. Fixed audit-classify.yml artifact paths to match audit-scan.yml uploads
+5. Added fallback messages when artifacts don't exist
+6. Improved error handling in security audit job
+
+### 2. Removed Python Setup from agent-orchestrator.yml
 **Before:**
 ```yaml
 - name: Setup Python
@@ -146,6 +173,9 @@ yamllint .github/workflows/*.yml
 
 | Date | Change | Reason |
 |------|--------|--------|
+| 2025-11-12 | Fixed CI/CD recurring failures | Security audit and tests were failing due to missing audit-ci dependency and blocking codecov uploads |
+| 2025-11-12 | Fixed audit workflow artifact paths | audit-classify.yml was looking for artifacts in wrong directories |
+| 2025-11-12 | Standardized npm ci usage | Changed from npm install to npm ci for consistent, faster builds |
 | 2025-11-12 | Removed Python setup from agent-orchestrator.yml | Project is Node.js, not Python |
 | 2025-11-12 | Created CI_STATUS.md documentation | Clarify what workflows actually exist |
 

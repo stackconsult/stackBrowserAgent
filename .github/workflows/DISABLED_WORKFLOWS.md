@@ -19,6 +19,12 @@ The following workflows have been temporarily disabled due to YAML syntax issues
    - Reason: Multiple heredocs with JSON/JS content causing YAML parser conflicts
    - Solution: Needs rewriting to use alternative file generation methods
 
+4. **auto-fix-dependencies.yml.disabled** - Auto-fix Dependencies (Nov 12, 2025)
+   - Status: Disabled as it contradicts CI/CD best practices
+   - Reason: Automatically replaces `npm ci` with `npm install`, which is incorrect
+   - Solution: `npm ci` is the correct command for CI/CD as it provides consistent, reproducible builds
+   - Why disabled: This workflow was likely created to work around a temporary issue but actually makes things worse by replacing the correct command (`npm ci`) with a less reliable one (`npm install`)
+
 ## Impact
 
 These workflows are part of the comprehensive AI Agent Builder system described in the agent instructions. Disabling them does NOT affect:
@@ -27,7 +33,6 @@ These workflows are part of the comprehensive AI Agent Builder system described 
 - ✅ Audit workflows (audit-scan.yml, audit-classify.yml, audit-fix.yml, audit-verify.yml)
 - ✅ Agent discovery workflow (agent-discovery.yml)
 - ✅ Agent orchestrator workflow (agent-orchestrator.yml - simplified)
-- ✅ Auto-fix dependencies workflow (auto-fix-dependencies.yml)
 
 ## Re-enabling
 
