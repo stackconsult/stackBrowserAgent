@@ -48,4 +48,4 @@ How to update this onboarding
 2. Provide a short explanation in the PR describing why the update is necessary.
 
 Notes
-- This repository's `test` script is currently a placeholder; prefer verifying with `build` + `lint` and smoke tests hitting the endpoints listed in `API.md`.
+- This repository now includes comprehensive automated tests; run `npm test` to verify changes along with `build` and `lint`.
