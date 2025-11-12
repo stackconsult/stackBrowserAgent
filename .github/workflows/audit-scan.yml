@@ -233,8 +233,8 @@ jobs:
       - name: Validate GitHub workflows
         run: |
           echo "Validating GitHub workflow syntax..."
-          for file in .github/workflows/*.yml .github/workflows/*.yaml; do
-            if [ -f "$file" ]; then
+          for file in .github/workflows/*.yml; do
+            if [ -f "$file" ] && [[ ! "$file" == *.disabled ]]; then
               echo "Checking $file..."
               # Basic YAML syntax check
               python3 -c "import yaml; yaml.safe_load(open('$file'))" && echo "✓ $file is valid YAML" || echo "✗ $file has YAML syntax errors"

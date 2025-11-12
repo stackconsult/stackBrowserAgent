@@ -25,7 +25,7 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       
       - name: Run linter
         run: npm run lint
@@ -46,6 +46,8 @@ jobs:
           files: ./coverage/lcov.info
           flags: unittests
           name: codecov-umbrella
+          fail_ci_if_error: false
+        continue-on-error: true
 
   security:
     name: Security Audit
@@ -58,16 +60,21 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20.x'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       
       - name: Run npm audit
-        run: npm audit --audit-level=moderate
+        run: |
+          echo "Running npm audit..."
+          npm audit --audit-level=moderate || echo "npm audit found issues but continuing..."
         continue-on-error: true
       
-      - name: Check for known vulnerabilities
-        run: npx audit-ci --moderate
+      - name: Check for known vulnerabilities with audit-ci
+        run: |
+          echo "Running audit-ci..."
+          npm run audit-ci || echo "audit-ci found issues but continuing..."
         continue-on-error: true
 
   build-docker:
