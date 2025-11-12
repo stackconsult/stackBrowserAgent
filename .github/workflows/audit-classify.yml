@@ -10,6 +10,10 @@ on:
     types:
       - completed
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   download-scan-results:
     name: Download Scan Results
@@ -18,27 +22,41 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
-      - name: Download scan artifacts
-        uses: actions/download-artifact@v4
+      - name: Download scan artifacts from workflow run
+        if: github.event_name == 'workflow_run'
+        uses: actions/github-script@v7
         with:
-          name: static-analysis-results
-          path: scan-results/static-analysis
-        continue-on-error: true
+          script: |
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }},
+            });
+            
+            for (const artifact of artifacts.data.artifacts) {
+              console.log(`Found artifact: ${artifact.name}`);
+              const download = await github.rest.actions.downloadArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+                archive_format: 'zip',
+              });
+              
+              const fs = require('fs');
+              fs.writeFileSync(`${artifact.name}.zip`, Buffer.from(download.data));
+            }
       
-      - name: Download security scan results
-        uses: actions/download-artifact@v4
-        with:
-          name: security-scan-results
-          path: scan-results/security
-        continue-on-error: true
-      
-      - name: Download dependency check results
-        uses: actions/download-artifact@v4
-        with:
-          name: dependency-check-results
-          path: scan-results/dependencies
+      - name: Extract artifacts
+        if: github.event_name == 'workflow_run'
+        run: |
+          mkdir -p scan-results
+          for zipfile in *.zip; do
+            if [ -f "$zipfile" ]; then
+              unzip -o "$zipfile" -d scan-results/
+            fi
+          done
         continue-on-error: true
       
       - name: Upload consolidated results
@@ -55,7 +73,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download consolidated results
         uses: actions/download-artifact@v4
@@ -64,7 +82,7 @@ jobs:
           path: scan-results
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
       
@@ -127,7 +145,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download consolidated results
         uses: actions/download-artifact@v4
@@ -189,7 +207,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download consolidated results
         uses: actions/download-artifact@v4
@@ -246,7 +264,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Download all classifications
         uses: actions/download-artifact@v4

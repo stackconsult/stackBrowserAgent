@@ -19,10 +19,12 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20.x'
           
@@ -30,32 +32,35 @@ jobs:
         id: check
         run: |
           echo "Checking for npm ci in workflow files..."
-          if grep -r "npm ci" .github/workflows/*.yml; then
+          if grep -r "npm ci" .github/workflows/*.yml 2>/dev/null; then
             echo "found=true" >> $GITHUB_OUTPUT
             echo "Found npm ci commands that should use npm install"
           else
             echo "found=false" >> $GITHUB_OUTPUT
             echo "All workflows already using npm install"
           fi
+        continue-on-error: true
           
       - name: Replace npm ci with npm install
         if: steps.check.outputs.found == 'true'
         run: |
           echo "Replacing npm ci with npm install in workflow files..."
           find .github/workflows -name "*.yml" -type f -exec sed -i 's/npm ci/npm install/g' {} +
+        continue-on-error: true
           
       - name: Verify package-lock.json exists
         run: |
           if [ ! -f "package-lock.json" ]; then
             echo "Warning: package-lock.json not found. Generating..."
-            npm install
+            npm install --package-lock-only
           else
             echo "package-lock.json exists"
           fi
+        continue-on-error: true
           
       - name: Create Pull Request
         if: steps.check.outputs.found == 'true'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'fix: Use npm install for better compatibility in CI/CD'
@@ -82,3 +87,4 @@ jobs:
             See `.github/agents/dependency-installer.agent.md` for more details.
           branch: auto-fix/dependency-installation
           delete-branch: true
+        continue-on-error: true
