@@ -225,6 +225,9 @@ If you need to adjust rate limits, modify the `limiter` and `authLimiter` config
 
 - **[API Reference](API.md)** - Complete API documentation with examples
 - **[Architecture](ARCHITECTURE.md)** - System architecture and design decisions
+- **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions for multiple platforms
+- **[Security Policy](SECURITY.md)** - Security best practices and vulnerability reporting
+- **[Monitoring Guide](MONITORING.md)** - Observability, logging, and alerting setup
 - **[Contributing](CONTRIBUTING.md)** - Contribution guidelines
 - **[Changelog](CHANGELOG.md)** - Version history and release notes
 

@@ -7,12 +7,17 @@ import { validateRequest, schemas } from './middleware/validation';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import { getHealthStatus } from './utils/health';
+import { validateEnvironment, printEnvironmentSummary } from './utils/env';
 
 // Load environment variables
 dotenv.config();
 
+// Validate environment configuration
+const envConfig = validateEnvironment();
+printEnvironmentSummary(envConfig);
+
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = envConfig.port;
 
 // Rate limiting configuration
 const limiter = rateLimit({
@@ -110,13 +115,13 @@ if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     logger.info(`Server started`, {
       port: PORT,
-      environment: process.env.NODE_ENV || 'development',
+      environment: envConfig.nodeEnv,
       nodeVersion: process.version,
     });
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`Health check: http://localhost:${PORT}/health`);
-    console.log(`Demo token: http://localhost:${PORT}/auth/demo-token`);
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📍 Environment: ${envConfig.nodeEnv}`);
+    console.log(`🏥 Health check: http://localhost:${PORT}/health`);
+    console.log(`🔑 Demo token: http://localhost:${PORT}/auth/demo-token`);
   });
 }
 

@@ -266,8 +266,7 @@ jobs:
           ## Quick Start
           \`\`\`bash
           # Install dependencies
-          npm ci
-          pip install -r requirements.txt
+          npm install
           
           # Configure environment
           cp .env.example .env
