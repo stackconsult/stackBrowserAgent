@@ -90,14 +90,14 @@ jobs:
         run: |
           echo "Classifying ESLint issues by severity..."
           
-          if [ -f scan-results/static-analysis/eslint-report.json ]; then
+          if [ -f scan-results/static-analysis-results/eslint-report.json ]; then
             # Parse ESLint JSON report
             echo "# Code Issues Classification" > code-issues.md
             echo "" >> code-issues.md
             
             # Count by severity
-            errors=$(jq '[.[].messages[] | select(.severity == 2)] | length' scan-results/static-analysis/eslint-report.json)
-            warnings=$(jq '[.[].messages[] | select(.severity == 1)] | length' scan-results/static-analysis/eslint-report.json)
+            errors=$(jq '[.[].messages[] | select(.severity == 2)] | length' scan-results/static-analysis-results/eslint-report.json)
+            warnings=$(jq '[.[].messages[] | select(.severity == 1)] | length' scan-results/static-analysis-results/eslint-report.json)
             
             echo "## Severity Summary" >> code-issues.md
             echo "- Critical/Errors: $errors" >> code-issues.md
@@ -106,29 +106,36 @@ jobs:
             
             # Group by rule type
             echo "## Issue Types" >> code-issues.md
-            jq -r '[.[].messages[]] | group_by(.ruleId) | map({rule: .[0].ruleId, count: length}) | sort_by(.count) | reverse | .[] | "- \(.rule): \(.count) occurrences"' scan-results/static-analysis/eslint-report.json >> code-issues.md
+            jq -r '[.[].messages[]] | group_by(.ruleId) | map({rule: .[0].ruleId, count: length}) | sort_by(.count) | reverse | .[] | "- \(.rule): \(.count) occurrences"' scan-results/static-analysis-results/eslint-report.json >> code-issues.md
             
             cat code-issues.md
           else
             echo "No ESLint report found"
+            echo "# Code Issues Classification" > code-issues.md
+            echo "" >> code-issues.md
+            echo "No ESLint issues found - code is clean!" >> code-issues.md
           fi
       
       - name: Classify TypeScript issues
         run: |
           echo "Classifying TypeScript issues..."
           
-          if [ -f scan-results/static-analysis/typescript-report.txt ]; then
+          if [ -f scan-results/static-analysis-results/typescript-report.txt ]; then
             echo "" >> code-issues.md
             echo "## TypeScript Issues" >> code-issues.md
             
             # Count TypeScript errors
-            ts_errors=$(grep -c "error TS" scan-results/static-analysis/typescript-report.txt || echo "0")
+            ts_errors=$(grep -c "error TS" scan-results/static-analysis-results/typescript-report.txt || echo "0")
             echo "- Total TypeScript errors: $ts_errors" >> code-issues.md
             
             # Categorize by error code
             echo "" >> code-issues.md
             echo "### By Error Code" >> code-issues.md
-            grep "error TS" scan-results/static-analysis/typescript-report.txt | sed 's/.*error \(TS[0-9]*\).*/\1/' | sort | uniq -c | sort -rn | awk '{print "- " $2 ": " $1 " occurrences"}' >> code-issues.md || echo "No TypeScript errors" >> code-issues.md
+            grep "error TS" scan-results/static-analysis-results/typescript-report.txt | sed 's/.*error \(TS[0-9]*\).*/\1/' | sort | uniq -c | sort -rn | awk '{print "- " $2 ": " $1 " occurrences"}' >> code-issues.md || echo "No TypeScript errors" >> code-issues.md
+          else
+            echo "" >> code-issues.md
+            echo "## TypeScript Issues" >> code-issues.md
+            echo "No TypeScript issues found - types are clean!" >> code-issues.md
           fi
       
       - name: Upload code issues classification
@@ -157,15 +164,15 @@ jobs:
         run: |
           echo "Classifying security vulnerabilities..."
           
-          if [ -f scan-results/security/npm-audit-report.json ]; then
+          if [ -f scan-results/security-scan-results/npm-audit-report.json ]; then
             echo "# Security Issues Classification" > security-issues.md
             echo "" >> security-issues.md
             
             # Parse npm audit report
-            critical=$(jq '.metadata.vulnerabilities.critical // 0' scan-results/security/npm-audit-report.json)
-            high=$(jq '.metadata.vulnerabilities.high // 0' scan-results/security/npm-audit-report.json)
-            moderate=$(jq '.metadata.vulnerabilities.moderate // 0' scan-results/security/npm-audit-report.json)
-            low=$(jq '.metadata.vulnerabilities.low // 0' scan-results/security/npm-audit-report.json)
+            critical=$(jq '.metadata.vulnerabilities.critical // 0' scan-results/security-scan-results/npm-audit-report.json)
+            high=$(jq '.metadata.vulnerabilities.high // 0' scan-results/security-scan-results/npm-audit-report.json)
+            moderate=$(jq '.metadata.vulnerabilities.moderate // 0' scan-results/security-scan-results/npm-audit-report.json)
+            low=$(jq '.metadata.vulnerabilities.low // 0' scan-results/security-scan-results/npm-audit-report.json)
             
             echo "## Vulnerability Severity" >> security-issues.md
             echo "- 🔴 Critical: $critical" >> security-issues.md
@@ -191,6 +198,9 @@ jobs:
             cat security-issues.md
           else
             echo "No security audit report found"
+            echo "# Security Issues Classification" > security-issues.md
+            echo "" >> security-issues.md
+            echo "No security vulnerabilities found - repository is secure!" >> security-issues.md
           fi
       
       - name: Upload security issues classification
@@ -223,28 +233,35 @@ jobs:
           echo "" >> dependency-issues.md
           
           # Check for outdated dependencies
-          if [ -f scan-results/dependencies/outdated-deps.json ]; then
-            outdated_count=$(jq 'keys | length' scan-results/dependencies/outdated-deps.json)
+          if [ -f scan-results/dependency-check-results/outdated-deps.json ]; then
+            outdated_count=$(jq 'keys | length' scan-results/dependency-check-results/outdated-deps.json)
             echo "## Outdated Dependencies: $outdated_count" >> dependency-issues.md
             echo "" >> dependency-issues.md
             
             # Categorize by update type (major, minor, patch)
             echo "### Update Types" >> dependency-issues.md
-            jq -r 'to_entries[] | "- \(.key): \(.value.current) → \(.value.latest) (\(.value.type // "unknown"))"' scan-results/dependencies/outdated-deps.json >> dependency-issues.md 2>/dev/null || echo "No specific version info available" >> dependency-issues.md
+            jq -r 'to_entries[] | "- \(.key): \(.value.current) → \(.value.latest) (\(.value.type // "unknown"))"' scan-results/dependency-check-results/outdated-deps.json >> dependency-issues.md 2>/dev/null || echo "No specific version info available" >> dependency-issues.md
+          else
+            echo "## Outdated Dependencies: 0" >> dependency-issues.md
+            echo "All dependencies are up to date!" >> dependency-issues.md
           fi
           
           # Check for dependency conflicts
-          if [ -f scan-results/dependencies/dependency-check.txt ]; then
+          if [ -f scan-results/dependency-check-results/dependency-check.txt ]; then
             echo "" >> dependency-issues.md
             echo "## Dependency Conflicts" >> dependency-issues.md
-            conflict_count=$(grep -c "conflict" scan-results/dependencies/dependency-check.txt || echo "0")
+            conflict_count=$(grep -c "conflict" scan-results/dependency-check-results/dependency-check.txt || echo "0")
             echo "- Detected conflicts: $conflict_count" >> dependency-issues.md
             
             if [ $conflict_count -gt 0 ]; then
               echo "" >> dependency-issues.md
               echo "### Conflict Details" >> dependency-issues.md
-              grep "conflict" scan-results/dependencies/dependency-check.txt | head -10 >> dependency-issues.md
+              grep "conflict" scan-results/dependency-check-results/dependency-check.txt | head -10 >> dependency-issues.md
             fi
+          else
+            echo "" >> dependency-issues.md
+            echo "## Dependency Conflicts" >> dependency-issues.md
+            echo "No conflicts detected!" >> dependency-issues.md
           fi
           
           cat dependency-issues.md
