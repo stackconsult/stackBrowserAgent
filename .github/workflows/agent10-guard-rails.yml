@@ -1,0 +1,130 @@
+name: Agent 10 - Guard Rails Validation
+
+on:
+  schedule:
+    # Run every Saturday at 4:00 AM MST (11:00 AM UTC)
+    - cron: '0 11 * * 6'
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      create_pr:
+        description: 'Create PR with fixes if issues found'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  validate-guard-rails:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run Guard Rails Validation
+        id: validation
+        run: |
+          chmod +x .github/agents/agent10/scripts/run-guard-rails-validation.sh
+          .github/agents/agent10/scripts/run-guard-rails-validation.sh
+        continue-on-error: true
+      
+      - name: Upload Validation Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guard-rails-report-${{ github.run_number }}
+          path: |
+            .github/agents/agent10/validations/latest/
+            .agent10-to-agent11.json
+          retention-days: 90
+      
+      - name: Update MCP Memory in Repository
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Only commit memory updates
+          git add .github/agents/agent10/memory/guard-rails-history.json
+          git add .agent10-to-agent11.json || true
+          
+          if git diff --staged --quiet; then
+            echo "No memory updates to commit"
+          else
+            git commit -m "[AGENT10] Weekly guard rails validation - Week ${{ github.run_number }}
+            
+            Automated validation run
+            Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+            Workflow: ${{ github.workflow }}
+            Run: ${{ github.run_number }}"
+            
+            git push origin HEAD:main || echo "Push failed - may need PR"
+          fi
+      
+      - name: Create Summary
+        if: always()
+        run: |
+          echo "# 🛡️ Agent 10: Guard Rails Validation Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f .github/agents/agent10/validations/latest/GUARD_RAILS_REPORT.md ]; then
+            cat .github/agents/agent10/validations/latest/GUARD_RAILS_REPORT.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Validation report not found" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Comment on Issues if Problems Found
+        if: steps.validation.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const handoffPath = '.agent10-to-agent11.json';
+            
+            if (fs.existsSync(handoffPath)) {
+              const handoff = JSON.parse(fs.readFileSync(handoffPath, 'utf8'));
+              const issuesFound = handoff.for_data_analysis.issues_found || 0;
+              
+              if (issuesFound > 0) {
+                github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `[AGENT10] Guard Rails Validation Found ${issuesFound} Issue(s)`,
+                  body: `## 🛡️ Guard Rails Validation Alert
+                  
+                  Agent 10 detected **${issuesFound} issue(s)** during automated validation.
+                  
+                  ### Validation Details
+                  - **Timestamp:** ${handoff.timestamp}
+                  - **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+                  - **Manual Review Required:** ${handoff.for_data_analysis.manual_review_required}
+                  
+                  ### Issues Detected
+                  ${JSON.stringify(handoff.guard_rails_validated, null, 2)}
+                  
+                  ### Next Steps
+                  1. Review the validation report artifact
+                  2. Address identified issues
+                  3. Re-run validation to confirm fixes
+                  
+                  **Validation Report:** Download from workflow artifacts
+                  `,
+                  labels: ['agent10', 'guard-rails', 'automated']
+                });
+              }
+            }
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
