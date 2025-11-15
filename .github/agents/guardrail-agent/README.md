@@ -1,13 +1,13 @@
-# Agent 10: Guard Rails & Error Prevention Specialist
+# GuardRail Agent: Guard Rails & Error Prevention Specialist
 
 ## Overview
 
-Agent 10 is an autonomous validation agent that ensures the stackBrowserAgent codebase never fails silently and always recovers gracefully. It detects and prevents infinite loops, race conditions, and edge cases while validating error handling across the entire codebase.
+GuardRail Agent is an autonomous validation agent that ensures the stackBrowserAgent codebase never fails silently and always recovers gracefully. It detects and prevents infinite loops, race conditions, and edge cases while validating error handling across the entire codebase.
 
 ## Directory Structure
 
 ```
-.github/agents/agent10/
+.github/agents/guardrail-agent/
 ├── README.md                          # This file
 ├── scripts/
 │   ├── run-guard-rails-validation.sh  # Main validation script
@@ -59,26 +59,26 @@ Agent 10 is an autonomous validation agent that ensures the stackBrowserAgent co
 
 ```bash
 # From repository root
-.github/agents/agent10/scripts/run-guard-rails-validation.sh
+.github/agents/guardrail-agent/scripts/run-guard-rails-validation.sh
 
 # View latest report
-cat .github/agents/agent10/validations/latest/GUARD_RAILS_REPORT.md
+cat .github/agents/guardrail-agent/validations/latest/GUARD_RAILS_REPORT.md
 
 # Check MCP memory
-cat .github/agents/agent10/memory/guard-rails-history.json
+cat .github/agents/guardrail-agent/memory/guard-rails-history.json
 ```
 
 ### Automated Execution
 
-Agent 10 is designed to run weekly via GitHub Actions on Saturday at 4:00 AM MST.
+GuardRail Agent is designed to run weekly via GitHub Actions on Saturday at 4:00 AM MST.
 
 To set up automated execution:
 
 1. Create GitHub Actions workflow file:
 
 ```yaml
-# .github/workflows/agent10-guard-rails.yml
-name: Agent 10 - Guard Rails Validation
+# .github/workflows/guardrail-agent-guard-rails.yml
+name: GuardRail Agent - Guard Rails Validation
 
 on:
   schedule:
@@ -100,13 +100,13 @@ jobs:
         run: npm install
       
       - name: Run Guard Rails Validation
-        run: .github/agents/agent10/scripts/run-guard-rails-validation.sh
+        run: .github/agents/guardrail-agent/scripts/run-guard-rails-validation.sh
       
       - name: Upload Validation Report
         uses: actions/upload-artifact@v3
         with:
           name: guard-rails-report
-          path: .github/agents/agent10/validations/latest/
+          path: .github/agents/guardrail-agent/validations/latest/
 ```
 
 2. The workflow will:
@@ -118,21 +118,21 @@ jobs:
 ## Integration with Other Agents
 
 ### Input from Agent 9 (Optimization)
-Agent 10 expects a handoff file `.agent9-to-agent10.json` containing:
+GuardRail Agent expects a handoff file `.agent9-to-guardrail-agent.json` containing:
 - Total optimizations made
 - Error handling changes
 - Files modified
 - Test results
 
 ### Output to Agent 11 (Data Analytics)
-Agent 10 creates `.agent10-to-agent11.json` containing:
+GuardRail Agent creates `.guardrail-agent-to-agent11.json` containing:
 - Validation results
 - Performance metrics
 - Issues found and fixed
 - Weekly comparison data
 
 ### Escalation to Agent 7 (Security)
-If security issues are detected, Agent 10 creates `.agent10-to-agent7-urgent.json`.
+If security issues are detected, GuardRail Agent creates `.guardrail-agent-to-agent7-urgent.json`.
 
 ## Guard Rails Currently in Place
 
@@ -164,7 +164,7 @@ Each validation generates a markdown report like this:
 
 ```markdown
 # Guard Rails Validation Report
-**Agent 10: Guard Rails & Error Prevention Specialist**
+**GuardRail Agent: Guard Rails & Error Prevention Specialist**
 **Date:** 2025-11-15
 
 ## Summary
@@ -186,7 +186,7 @@ Each validation generates a markdown report like this:
 
 ## MCP Memory Structure
 
-Agent 10 maintains historical memory in JSON format:
+GuardRail Agent maintains historical memory in JSON format:
 
 ```json
 [
@@ -221,7 +221,7 @@ The memory keeps the last 52 weeks (1 year) of validation history.
 
 ## Performance Impact
 
-Agent 10 validations have minimal performance impact:
+GuardRail Agent validations have minimal performance impact:
 
 - **Validation Time:** ~30-60 seconds for full scan
 - **Runtime Overhead:** < 15ms per request (from guard rails)
@@ -232,13 +232,13 @@ Agent 10 validations have minimal performance impact:
 ### Validation Script Fails
 ```bash
 # Check script permissions
-ls -la .github/agents/agent10/scripts/
+ls -la .github/agents/guardrail-agent/scripts/
 
 # Make scripts executable
-chmod +x .github/agents/agent10/scripts/*.sh
+chmod +x .github/agents/guardrail-agent/scripts/*.sh
 
 # Run with verbose output
-bash -x .github/agents/agent10/scripts/run-guard-rails-validation.sh
+bash -x .github/agents/guardrail-agent/scripts/run-guard-rails-validation.sh
 ```
 
 ### Tests Fail During Validation
@@ -247,15 +247,15 @@ bash -x .github/agents/agent10/scripts/run-guard-rails-validation.sh
 npm test
 
 # Check test output
-cat .github/agents/agent10/validations/latest/test-results.log
+cat .github/agents/guardrail-agent/validations/latest/test-results.log
 ```
 
 ### Handoff Files Missing
-Agent 10 can run without handoff files from Agent 9. It will create a baseline validation.
+GuardRail Agent can run without handoff files from Agent 9. It will create a baseline validation.
 
 ## Contributing
 
-When adding new validations to Agent 10:
+When adding new validations to GuardRail Agent:
 
 1. Add validation logic to `run-guard-rails-validation.sh`
 2. Update the report template to include new checks
@@ -265,7 +265,7 @@ When adding new validations to Agent 10:
 
 ## Documentation Annotations
 
-When Agent 10 adds guard rails, it uses this annotation format:
+When GuardRail Agent adds guard rails, it uses this annotation format:
 
 ```typescript
 // AGENT10_GUARD: {protection_type} - {reason}
@@ -287,7 +287,7 @@ if (!config) {
 
 ## Future Enhancements
 
-Potential improvements for Agent 10:
+Potential improvements for GuardRail Agent:
 
 - [ ] Circuit breaker pattern implementation
 - [ ] Request correlation ID tracking
@@ -299,13 +299,13 @@ Potential improvements for Agent 10:
 
 ## Support
 
-For issues or questions about Agent 10:
+For issues or questions about GuardRail Agent:
 
 1. Check existing validation reports
 2. Review MCP memory for patterns
-3. Open an issue with the `agent10` label
+3. Open an issue with the `guardrail-agent` label
 4. Include validation report in issue description
 
 ## License
 
-Agent 10 is part of the stackBrowserAgent project and follows the same ISC license.
+GuardRail Agent is part of the stackBrowserAgent project and follows the same ISC license.

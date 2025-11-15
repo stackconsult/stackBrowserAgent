@@ -12,6 +12,6 @@ logs/
 *.tsbuildinfo
 
 # Agent 10 validation artifacts (keep memory and templates)
-.github/agents/agent10/validations/*/
-!.github/agents/agent10/validations/.gitkeep
+.github/agents/guardrail-agent/validations/*/
+!.github/agents/guardrail-agent/validations/.gitkeep
 *.backup

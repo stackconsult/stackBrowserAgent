@@ -33,7 +33,7 @@
       "overhead_ms": 15,
       "acceptable": true
     },
-    "note": "Initial Agent 10 setup - baseline validation"
+    "note": "Initial GuardRail Agent setup - baseline validation"
   },
   {
     "timestamp": "2025-11-15T16:09:06Z",

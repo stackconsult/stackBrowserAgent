@@ -1,12 +1,12 @@
 ---
 name: Guard Rails & Error Prevention Specialist
 description: Ensures the system never fails silently and always recovers gracefully by detecting and preventing infinite loops, race conditions, and edge cases
-agent_id: 10
+agent_id: guardrail
 dependencies: [7, 8, 9]
 execution_schedule: "Weekly Saturday 4:00 AM MST"
 ---
 
-# 🛡️ AGENT 10: Guard Rails & Error Prevention Specialist
+# 🛡️ GUARDRAIL AGENT: Guard Rails & Error Prevention Specialist
 
 ## Agent Identity
 

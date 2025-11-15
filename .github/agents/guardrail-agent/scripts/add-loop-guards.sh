@@ -29,13 +29,13 @@ add_loop_guard() {
       last_import_line=$(grep -n "^import" "$file" | tail -1 | cut -d: -f1)
       sed -i "${last_import_line}a\\
 \\
-// AGENT10_GUARD: Max iterations to prevent infinite loops\\
+// GUARDRAIL_GUARD: Max iterations to prevent infinite loops\\
 const MAX_ITERATIONS = 1000;\\
 " "$file"
     else
       # Add at top
       sed -i "1i\\
-// AGENT10_GUARD: Max iterations to prevent infinite loops\\
+// GUARDRAIL_GUARD: Max iterations to prevent infinite loops\\
 const MAX_ITERATIONS = 1000;\\
 \\
 " "$file"

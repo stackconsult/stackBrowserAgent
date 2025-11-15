@@ -1,5 +1,5 @@
 #!/bin/bash
-# Agent 10: Guard Rails & Error Prevention Specialist
+# GuardRail Agent: Guard Rails & Error Prevention Specialist
 # Validation Script for stackBrowserAgent
 # Runs: Every Saturday 4:00 AM MST (after Agent 9)
 
@@ -14,7 +14,7 @@ MEMORY_DIR="$SCRIPT_DIR/../memory"
 mkdir -p "$VALIDATION_DIR"
 mkdir -p "$MEMORY_DIR"
 
-echo "🛡️  Agent 10: Guard Rails & Error Prevention Validation"
+echo "🛡️  GuardRail Agent: Guard Rails & Error Prevention Validation"
 echo "========================================================"
 echo "Timestamp: $TIMESTAMP"
 echo "Repository: stackBrowserAgent"
@@ -26,7 +26,7 @@ echo ""
 # ============================================
 echo "📥 Checking for handoff artifacts..."
 
-AGENT9_HANDOFF="$REPO_ROOT/.agent9-to-agent10.json"
+AGENT9_HANDOFF="$REPO_ROOT/.agent9-to-guardrail-agent.json"
 if [ -f "$AGENT9_HANDOFF" ]; then
   echo "✅ Found Agent 9 handoff artifact"
   TOTAL_OPTIMIZATIONS=$(jq -r '.changes_summary.total_optimizations // 0' "$AGENT9_HANDOFF")
@@ -215,7 +215,7 @@ echo "📊 Generating validation report..."
 
 cat > "$VALIDATION_DIR/GUARD_RAILS_REPORT.md" <<EOF
 # Guard Rails Validation Report
-**Agent 10: Guard Rails & Error Prevention Specialist**  
+**GuardRail Agent: Guard Rails & Error Prevention Specialist**  
 **Date:** $(date)  
 **Repository:** stackBrowserAgent
 
@@ -295,7 +295,7 @@ Current guard rails have minimal performance impact:
 
 **Validation Complete**  
 **Next Agent:** Agent 11 (Data Analytics & Comparison)  
-**Handoff File:** .agent10-to-agent11.json
+**Handoff File:** .guardrail-agent-to-agent11.json
 EOF
 
 cat "$VALIDATION_DIR/GUARD_RAILS_REPORT.md"
@@ -311,7 +311,7 @@ echo ""
 # ============================================
 # STEP 8: Update MCP Memory
 # ============================================
-echo "💾 Updating Agent 10 MCP memory..."
+echo "💾 Updating GuardRail Agent MCP memory..."
 
 MEMORY_FILE="$MEMORY_DIR/guard-rails-history.json"
 
@@ -364,7 +364,7 @@ echo ""
 # ============================================
 echo "🔄 Creating handoff for Agent 11..."
 
-cat > "$REPO_ROOT/.agent10-to-agent11.json" <<EOF
+cat > "$REPO_ROOT/.guardrail-agent-to-agent11.json" <<EOF
 {
   "from_agent": 10,
   "to_agent": 11,
@@ -416,7 +416,7 @@ cat > "$REPO_ROOT/.agent10-to-agent11.json" <<EOF
 }
 EOF
 
-echo "✅ Handoff created: .agent10-to-agent11.json"
+echo "✅ Handoff created: .guardrail-agent-to-agent11.json"
 
 echo ""
 
@@ -424,7 +424,7 @@ echo ""
 # STEP 10: Final Summary
 # ============================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ Agent 10 Guard Rails Validation Complete"
+echo "✅ GuardRail Agent Guard Rails Validation Complete"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "🛡️  Protection Status:"
@@ -436,7 +436,7 @@ echo "  Test Suite:       $([ "$TEST_STATUS" = "passed" ] && echo "✅ Passed" |
 echo ""
 echo "📁 Report: $VALIDATION_DIR/GUARD_RAILS_REPORT.md"
 echo "💾 MCP Memory: $MEMORY_FILE"
-echo "🔄 Handoff: .agent10-to-agent11.json → Agent 11"
+echo "🔄 Handoff: .guardrail-agent-to-agent11.json → Agent 11"
 echo ""
 echo "➡️  Next: Agent 11 (Data Analytics) will analyze patterns and trends"
 echo ""

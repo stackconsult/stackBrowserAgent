@@ -25,12 +25,12 @@ add_timeout_protection() {
       last_import_line=$(grep -n "^import" "$file" | tail -1 | cut -d: -f1)
       sed -i "${last_import_line}a\\
 \\
-// AGENT10_GUARD: Timeout for external HTTP requests (30 seconds)\\
+// GUARDRAIL_GUARD: Timeout for external HTTP requests (30 seconds)\\
 const REQUEST_TIMEOUT = 30000;\\
 " "$file"
     else
       sed -i "1i\\
-// AGENT10_GUARD: Timeout for external HTTP requests (30 seconds)\\
+// GUARDRAIL_GUARD: Timeout for external HTTP requests (30 seconds)\\
 const REQUEST_TIMEOUT = 30000;\\
 \\
 " "$file"
