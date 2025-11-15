@@ -10,3 +10,8 @@ logs/
 .npm
 .eslintcache
 *.tsbuildinfo
+
+# Agent 10 validation artifacts (keep memory and templates)
+.github/agents/guardrail-agent/validations/*/
+!.github/agents/guardrail-agent/validations/.gitkeep
+*.backup
