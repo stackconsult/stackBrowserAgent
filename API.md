@@ -377,3 +377,89 @@ Default expiration: 24 hours (configurable via `JWT_EXPIRATION` env var)
 - [Express.js Documentation](https://expressjs.com/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Railway Documentation](https://docs.railway.app/)
+
+## Agent Orchestration API
+
+The agent orchestration system provides automated repository analysis, gap detection, and intelligent fixes.
+
+### POST /api/v1/agents/orchestrate
+
+Start full repository orchestration.
+
+**Authentication**: Required
+
+**Request Body**:
+```json
+{
+  "repositoryPath": "/path/to/repository",
+  "targetScope": "full",
+  "autoFix": true
+}
+```
+
+**Response** (200 OK):
+```json
+{
+  "orchestrationId": "orch-1234567890-abc123",
+  "status": "started",
+  "message": "Orchestration started successfully",
+  "statusUrl": "/api/v1/agents/status/orch-1234567890-abc123"
+}
+```
+
+### POST /api/v1/agents/analyze
+
+Analyze repository only (no fixes).
+
+**Authentication**: Required
+
+**Request Body**:
+```json
+{
+  "repositoryPath": "/path/to/repository"
+}
+```
+
+**Response** (200 OK):
+```json
+{
+  "status": "success",
+  "data": {
+    "structure": {...},
+    "languages": [...],
+    "frameworks": [...],
+    "healthScore": 85
+  },
+  "metrics": {...}
+}
+```
+
+### GET /api/v1/agents/status/:id
+
+Get orchestration status.
+
+**Authentication**: Required
+
+**Response** (200 OK):
+```json
+{
+  "orchestrationId": "orch-1234567890-abc123",
+  "status": "running",
+  "result": null
+}
+```
+
+### GET /api/v1/agents/types
+
+List available agent types.
+
+**Authentication**: Required
+
+**Response** (200 OK):
+```json
+{
+  "agentTypes": ["agent0", "agent0a", "agent0b", "agent0c", "agent18", "agent19", "agent20"]
+}
+```
+
+For complete agent documentation, see [AGENTS.md](docs/AGENTS.md).
