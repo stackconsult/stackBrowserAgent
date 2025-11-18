@@ -8,6 +8,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import { getHealthStatus } from './utils/health';
 import { validateEnvironment, printEnvironmentSummary } from './utils/env';
+import { MetaAgentOrchestrator, RepositoryAnalyzer, AgentType } from './agents';
 
 // Load environment variables
 dotenv.config();
@@ -101,6 +102,124 @@ app.get('/api/agent/status', authenticateToken, (req: Request, res: Response) =>
     status: 'running',
     user: authenticatedReq.user,
     timestamp: new Date().toISOString()
+  });
+});
+
+// Agent orchestration endpoints
+
+// Store ongoing orchestrations (in-memory for now)
+const orchestrations = new Map<string, { status: string; result?: unknown; error?: string }>();
+
+// POST /api/v1/agents/orchestrate - Start full orchestration
+app.post('/api/v1/agents/orchestrate', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { repositoryPath, targetScope, autoFix } = req.body;
+
+    if (!repositoryPath) {
+      res.status(400).json({ error: 'repositoryPath is required' });
+      return;
+    }
+
+    // Generate orchestration ID
+    const orchestrationId = `orch-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    // Start orchestration asynchronously
+    orchestrations.set(orchestrationId, { status: 'running' });
+
+    // Execute orchestration in background
+    (async () => {
+      try {
+        const orchestrator = new MetaAgentOrchestrator();
+        const result = await orchestrator.execute({
+          repositoryPath,
+          targetScope: targetScope || 'full',
+          autoFix: autoFix !== false
+        });
+
+        orchestrations.set(orchestrationId, {
+          status: result.status,
+          result: result.data
+        });
+      } catch (error) {
+        orchestrations.set(orchestrationId, {
+          status: 'failed',
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    })();
+
+    res.json({
+      orchestrationId,
+      status: 'started',
+      message: 'Orchestration started successfully',
+      statusUrl: `/api/v1/agents/status/${orchestrationId}`
+    });
+  } catch (error) {
+    logger.error('Orchestration start failed', { error });
+    res.status(500).json({
+      error: 'Failed to start orchestration',
+      details: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+// POST /api/v1/agents/analyze - Analyze repository only
+app.post('/api/v1/agents/analyze', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { repositoryPath } = req.body;
+
+    if (!repositoryPath) {
+      res.status(400).json({ error: 'repositoryPath is required' });
+      return;
+    }
+
+    const analyzer = new RepositoryAnalyzer();
+    const result = await analyzer.execute({
+      repositoryPath,
+      includeHidden: false,
+      maxDepth: 10,
+      scanDependencies: true
+    });
+
+    res.json({
+      status: result.status,
+      message: result.message,
+      data: result.data,
+      metrics: result.metrics
+    });
+  } catch (error) {
+    logger.error('Repository analysis failed', { error });
+    res.status(500).json({
+      error: 'Failed to analyze repository',
+      details: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+// GET /api/v1/agents/status/:id - Get orchestration status
+app.get('/api/v1/agents/status/:id', authenticateToken, (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const orchestration = orchestrations.get(id);
+
+  if (!orchestration) {
+    res.status(404).json({ error: 'Orchestration not found' });
+    return;
+  }
+
+  res.json({
+    orchestrationId: id,
+    status: orchestration.status,
+    result: orchestration.result,
+    error: orchestration.error
+  });
+});
+
+// GET /api/v1/agents/types - List available agent types
+app.get('/api/v1/agents/types', authenticateToken, (req: Request, res: Response) => {
+  res.json({
+    agentTypes: Object.values(AgentType),
+    description: 'Available agent types in the orchestration system'
   });
 });
 

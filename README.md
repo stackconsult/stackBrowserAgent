@@ -375,3 +375,53 @@ Built with:
 
 **Made with ❤️ by stackconsult**
 
+
+## 🤖 Agent Orchestration System
+
+stackBrowserAgent includes a complete meta-agent orchestration system for automated repository analysis and improvements.
+
+### Quick Start
+
+```typescript
+import { MetaAgentOrchestrator } from './agents';
+
+const orchestrator = new MetaAgentOrchestrator();
+const result = await orchestrator.execute({
+  repositoryPath: process.cwd(),
+  targetScope: 'full',
+  autoFix: true
+});
+
+console.log('Health Score:', result.data.summary.healthScore);
+console.log('Issues Found:', result.data.summary.totalIssues);
+```
+
+### Available Agents
+
+- **Agent 0**: Meta-Agent Orchestrator - Main coordination engine
+- **Agent 0A**: Repository Analyzer - Deep code analysis
+- **Agent 0B**: Architecture Mapper - Component mapping
+- **Agent 0C**: Build Orchestrator - Task execution
+- **Agent 18**: UI Generator - Landing pages, dashboards
+- **Agent 19**: GitHub Pages Generator - Documentation sites
+- **Agent 20**: Browser Extension Generator - Extension scaffolding
+
+### API Usage
+
+```bash
+# Get demo token
+TOKEN=$(curl -s http://localhost:3000/auth/demo-token | jq -r '.token')
+
+# Analyze repository
+curl -X POST http://localhost:3000/api/v1/agents/analyze \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"repositoryPath": "/path/to/repo"}'
+```
+
+### Documentation
+
+- **[Complete Agent Documentation](docs/AGENTS.md)** - Full system guide
+- **[API Reference](API.md)** - REST API endpoints
+- **[Architecture](ARCHITECTURE.md)** - System design
+
